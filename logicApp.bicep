@@ -1,10 +1,15 @@
+// Environment Parameters
 param subscriptionId string = 'f4972a61-1083-4904-a4e2-a790107320bf'
-param workflows_GetImageVersion_name string = 'GetImageVersion10'
-param connections_azureautomation_externalid string = '/subscriptions/f4972a61-1083-4904-a4e2-a790107320bf/resourceGroups/avdtest/providers/Microsoft.Web/connections/azureautomation'
+param tenantId string = 'f7fd127b-9a9f-4748-b8a4-21b7d7f10fbd'
+param clientId string = 'd3e8677d-b330-4546-988c-d678dcdf79ff'
+param deploymentNameSuffix string = utcNow()
+param resourceGroupName string = 'avdtest'
+param keyVaultName string = 'kv-baseline-til-001'
+param keyVaultResourceGroup string = 'rg-baseline-til-001'
 param location string = 'usgovvirginia'
-param recurrenceFrequency string = 'Minute'
-param recurrenceInterval int = 5
-param recurrenceType string = 'Recurrence'
+
+// Automation Account Parameters
+param automationAccountConnectionName string = 'azureautomation'
 param automationAccountName string = 'avdtest'
 param automationAccountResourceGroup string = 'avdtest'
 param automationAccountLocation string = 'usgovvirginia'
@@ -12,17 +17,19 @@ param runbookNewHostPoolRipAndReplace string = 'New-HostPoolRipAndReplace'
 param runbookScheduleRunbookName string = 'Get-RunBookSchedule'
 param runbookGetSessionHostVm string = 'Get-SessionHostVirtualMachine'
 param runbookMarketPlaceImageVersion string = 'Get-MarketPlaceImageVersion'
+
+// GetImageVersion Logic App Parameters
+param workflows_GetImageVersion_name string = 'GetImageVersion'
+param recurrenceFrequency string = 'Minute'
+param recurrenceInterval int = 5
+param recurrenceType string = 'Recurrence'
 param waitForRunBook bool = true
 param falseExpression bool = false
 param trueExpression bool = true
-param resourceGroupName string = 'avdtest'
-param deploymentNameSuffix string = utcNow()
-param keyVaultName string = 'kv-baseline-til-001'
-param keyVaultResourceGroup string = 'rg-baseline-til-001'
 
-//
-param workflows_GetBlobUpdate_name string = 'GetBlobUpdate10'
-param automationAccountConnectionName string = 'azureautomation'
+
+// Get BlobUpdate Logic App Parameters
+param workflows_GetBlobUpdate_name string = 'GetBlobUpdate'
 param blobConnectionName string = 'azureblob'
 param identityType string = 'SystemAssigned'
 param state string = 'Enabled'
@@ -36,17 +43,15 @@ param hostPoolName string = 'ProdMirror'
 param checkBothCreatedAndModifiedDateTime bool = false
 param maxFileCount int = 10
 
-//
+// Storage account name
 param storageAccountName string = 'avdtest2'
 
-//
-param tenantId string = 'f7fd127b-9a9f-4748-b8a4-21b7d7f10fbd'
-param clientId string = 'd3e8677d-b330-4546-988c-d678dcdf79ff'
-param displayName string = 'azureautomation'
+// Service principal information
 param iconUri string = 'https://connectoricons-prod.azureedge.net/releases/v1.0.1538/1.0.1538.2619/azureautomation/icon.png'
 param apiType string = 'Microsoft.Web/locations/managedApis'
 param description string = 'Azure Automation provides tools to manage your cloud and on-premises infrastructure seamlessly.'
 param brandColor string = '#56A0D7'
+
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
     name: keyVaultName
@@ -63,7 +68,7 @@ module automationAccountConnection 'modules/automationAccountConnection.bicep'= 
     subscriptionId:subscriptionId
     tenantId: tenantId
     clientId:clientId
-    displayName: displayName
+    displayName: automationAccountConnectionName
     iconUri:iconUri
     apiType:apiType
     description:description
@@ -87,7 +92,7 @@ module getImageVersionlogicApp 'modules/logicapp_getimageversion.bicep' = {
   params: {
   subscriptionId:subscriptionId
   workflows_GetImageVersion_name:workflows_GetImageVersion_name
-  connections_azureautomation_externalid:connections_azureautomation_externalid
+  automationAccountConnectionName: automationAccountConnectionName
   location:location
   state:state
   recurrenceFrequency:recurrenceFrequency
@@ -118,6 +123,8 @@ module getBlobUpdateLogicApp 'modules/logicapp_getblobupdate.bicep' = {
     location:location
     workflows_GetBlobUpdate_name: workflows_GetBlobUpdate_name
     automationAccountConnectionName: automationAccountConnectionName
+    automationAccountName: automationAccountName
+    automationAccountResourceGroup: automationAccountResourceGroup
     blobConnectionName: blobConnectionName
     identityType: identityType
     state: state
@@ -130,6 +137,10 @@ module getBlobUpdateLogicApp 'modules/logicapp_getblobupdate.bicep' = {
     hostPoolName: hostPoolName
     checkBothCreatedAndModifiedDateTime: checkBothCreatedAndModifiedDateTime
     maxFileCount: maxFileCount
+    subscriptionId: subscriptionId
+    runbookGetRunBookSchedule: runbookScheduleRunbookName
+    runbookGetSessionHostVirtualMachine: runbookGetSessionHostVm
+    runbookNewHostPoolRipAndReplace: runbookNewHostPoolRipAndReplace
   }
   dependsOn: [
     automationAccountConnection

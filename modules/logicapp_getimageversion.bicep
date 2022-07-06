@@ -1,6 +1,6 @@
 param subscriptionId string
 param workflows_GetImageVersion_name string
-param connections_azureautomation_externalid string
+param automationAccountConnectionName string
 param location string
 param state string
 param recurrenceFrequency string
@@ -321,7 +321,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
       '$connections': {
         value: {
           azureautomation: {
-            connectionId: connections_azureautomation_externalid
+            connectionId: '/subscriptions/${subscriptionId}/resourceGroups/${automationAccountResourceGroup}/providers/Microsoft.Web/connections/${automationAccountConnectionName}'
             connectionName: 'azureautomation'
             id: concat('/subscriptions/${subscriptionId}/providers/Microsoft.Web/locations/${automationAccountLocation}/managedApis/azureautomation')
           }

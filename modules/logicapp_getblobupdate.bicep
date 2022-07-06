@@ -1,24 +1,24 @@
-param subscriptionId string = 'f4972a61-1083-4904-a4e2-a790107320bf'
-param workflows_GetBlobUpdate_name string = 'GetBlobUpdate6'
-param automationAccountConnectionName string = 'azureautomation-7'
-param automationAccountResourceGroup string = 'avdtest'
-param automationAccountName string = 'avdtest'
-param blobConnectionName string = 'azureblob-5'
-param location string = 'usgovvirginia'
-param identityType string = 'SystemAssigned'
-param state string = 'Enabled'
-param schema string = 'https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#'
-param contentVersion string = '1.0.0.0'
-param connectionType string = 'Object'
-param triggerFrequency string = 'Minute'
-param triggerInterval int = 3
-param container string =  'avdtest2'
-param hostPoolName string = 'ProdMirror'
-param checkBothCreatedAndModifiedDateTime bool = false
-param maxFileCount int = 10
-param runbookNewHostPoolRipAndReplace string = 'New-HostPoolRipAndReplace'
-param runbookGetRunBookSchedule string = 'Get-RunBookSchedule'
-param runbookGetSessionHostVirtualMachine string = 'Get-SessionHostVirtualMachine'
+param subscriptionId string
+param workflows_GetBlobUpdate_name string
+param automationAccountConnectionName string
+param automationAccountResourceGroup string
+param automationAccountName string
+param blobConnectionName string
+param location string
+param identityType string
+param state string
+param schema string
+param contentVersion string
+param connectionType string
+param triggerFrequency string
+param triggerInterval int
+param container string
+param hostPoolName string
+param checkBothCreatedAndModifiedDateTime bool
+param maxFileCount int
+param runbookNewHostPoolRipAndReplace string
+param runbookGetRunBookSchedule string
+param runbookGetSessionHostVirtualMachine string
 
 resource workflows_GetBlobUpdate_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetBlobUpdate_name
