@@ -9,7 +9,7 @@ $connectionName = "AzureRunAsConnection"
 try
 {
     # Get the connection "AzureRunAsConnection "
-    $servicePrincipalConnection=Get-AutomationConnection -Name $connectionName         
+    $servicePrincipalConnection=Get-AutomationConnection -Name $connectionName
 
     Add-AzAccount `
         -ServicePrincipal `
