@@ -141,6 +141,7 @@ module getImageVersionlogicApp 'modules/logicapp_getimageversion.bicep' = {
     hostPoolName: hostPoolName
   }
   dependsOn: [
+    automationAcccount
     automationAccountConnection
     blobConnection
   ]
@@ -173,6 +174,7 @@ module getBlobUpdateLogicApp 'modules/logicapp_getblobupdate.bicep' = {
     runbookNewHostPoolRipAndReplace: runbookNewHostPoolRipAndReplace
   }
   dependsOn: [
+    automationAcccount
     automationAccountConnection
     blobConnection
   ]
