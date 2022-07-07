@@ -54,9 +54,23 @@ param apiType string = 'Microsoft.Web/locations/managedApis'
 param description string = 'Azure Automation provides tools to manage your cloud and on-premises infrastructure seamlessly.'
 param brandColor string = '#56A0D7'
 
-param uris array = [
-  'https://raw.githubusercontent.com/jamasten/Azure/master/solutions/scalingAutomation/scale.ps1'
-  'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-MarketPlaceImageVersion.ps1'
+var runbooks  = [
+  {
+    name: 'Get-RunBookSchedule'
+    uri: 'https://github.com/mikedzikowski/logicapps/blob/main/runbooks/Get-RunBookSchedule.ps1'
+  }
+  {
+    name: 'Get-MarketPlaceImageVersion'
+    uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-MarketPlaceImageVersion.ps1'
+  }
+  {
+    name:'Get-SessionHostVirtualMachine'
+    uri: 'https://github.com/mikedzikowski/logicapps/blob/main/runbooks/Get-SessionHostVirtualMachine.ps1'
+  }
+  {
+    name: 'New-HostPoolRipAndReplace'
+    uri: 'https://github.com/mikedzikowski/logicapps/blob/main/runbooks/New-HostPoolRipAndReplace.ps1'
+  }
 ]
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
@@ -64,13 +78,14 @@ resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
   scope: resourceGroup(subscriptionId, keyVaultResourceGroup)
 }
 
-module automationAcccount 'modules/automationAccount.bicep' = [for uri in uris: {
-  name: 'automationAccount-${uri}-deployment-${deploymentNameSuffix}'
+module automationAcccount 'modules/automationAccount.bicep' = [for (runbook, i) in runbooks :  {
+  name: '${automationAccountName}${runbook.name}${i}'
   scope: resourceGroup(subscriptionId, automationAccountResourceGroup)
   params: {
     automationAccountName: automationAccountName
     location: location
-    uri: uri
+    uri: runbook.uri
+    runbookName: runbook.name
   }
 }]
 

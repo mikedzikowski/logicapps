@@ -1,6 +1,8 @@
 param location string
 param automationAccountName string
+@secure()
 param uri string
+param runbookName string
 
 resource automationAccount 'Microsoft.Automation/automationAccounts@2021-06-22' = {
   name: automationAccountName
@@ -16,7 +18,7 @@ resource automationAccount 'Microsoft.Automation/automationAccounts@2021-06-22' 
 }
 
 resource runbook 'Microsoft.Automation/automationAccounts/runbooks@2019-06-01' = {
-  name: 'runbook'
+  name: runbookName
   parent: automationAccount
   location: location
   properties: {
