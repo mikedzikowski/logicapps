@@ -56,6 +56,7 @@ param brandColor string = '#56A0D7'
 
 param uris array = [
   'https://raw.githubusercontent.com/jamasten/Azure/master/solutions/scalingAutomation/scale.ps1'
+  'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-MarketPlaceImageVersion.ps1'
 ]
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
