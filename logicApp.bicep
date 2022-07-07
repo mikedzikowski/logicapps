@@ -1,5 +1,4 @@
 // Environment Parameters
-
 param deploymentNameSuffix string = utcNow()
 param resourceGroupName string = 'avdtest'
 param keyVaultName string = 'kv-baseline-til-001'
@@ -40,8 +39,8 @@ param hostPoolName string = 'ProdMirror'
 param checkBothCreatedAndModifiedDateTime bool = false
 param maxFileCount int = 10
 
-param clientId string = 'd3e8677d-b330-4546-988c-d678dcdf79ff'
-
+// Variables
+var clientId = 'd3e8677d-b330-4546-988c-d678dcdf79ff'
 var subscriptionId = subscription().subscriptionId
 var tenantId = subscription().tenantId
 
