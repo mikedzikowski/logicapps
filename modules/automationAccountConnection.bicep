@@ -6,10 +6,10 @@ param clientId string
 @secure()
 param clientSecret string
 param displayName string
-param iconUri string = 'https://connectoricons-prod.azureedge.net/releases/v1.0.1538/1.0.1538.2619/azureautomation/icon.png'
-param apiType string = 'Microsoft.Web/locations/managedApis'
-param description string = 'Azure Automation provides tools to manage your cloud and on-premises infrastructure seamlessly.'
-param brandColor string = '#56A0D7'
+param iconUri string
+param apiType string
+param description string
+param brandColor string
 
 resource connection_azureautomation_name_resource 'Microsoft.Web/connections@2016-06-01' = {
   name: connection_azureautomation_name
