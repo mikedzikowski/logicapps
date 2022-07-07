@@ -57,7 +57,7 @@ param brandColor string = '#56A0D7'
 var runbooks  = [
   {
     name: 'Get-RunBookSchedule'
-    uri: 'https://github.com/mikedzikowski/logicapps/blob/main/runbooks/Get-RunBookSchedule.ps1'
+    uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-RunBookSchedule.ps1'
   }
   {
     name: 'Get-MarketPlaceImageVersion'
@@ -65,7 +65,7 @@ var runbooks  = [
   }
   {
     name:'Get-SessionHostVirtualMachine'
-    uri: 'https://github.com/mikedzikowski/logicapps/blob/main/runbooks/Get-SessionHostVirtualMachine.ps1'
+    uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-SessionHostVirtualMachine.ps1'
   }
   {
     name: 'New-HostPoolRipAndReplace'
