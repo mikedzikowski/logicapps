@@ -1,0 +1,1 @@
+Write-Verbose "hello world"

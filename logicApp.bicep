@@ -1,7 +1,5 @@
 // Environment Parameters
-param subscriptionId string = 'f4972a61-1083-4904-a4e2-a790107320bf'
-param tenantId string = 'f7fd127b-9a9f-4748-b8a4-21b7d7f10fbd'
-param clientId string = 'd3e8677d-b330-4546-988c-d678dcdf79ff'
+
 param deploymentNameSuffix string = utcNow()
 param resourceGroupName string = 'avdtest'
 param keyVaultName string = 'kv-baseline-til-001'
@@ -27,7 +25,6 @@ param waitForRunBook bool = true
 param falseExpression bool = false
 param trueExpression bool = true
 
-
 // Get BlobUpdate Logic App Parameters
 param workflows_GetBlobUpdate_name string = 'GetBlobUpdate'
 param blobConnectionName string = 'azureblob'
@@ -38,10 +35,15 @@ param contentVersion string = '1.0.0.0'
 param connectionType string = 'Object'
 param triggerFrequency string = 'Minute'
 param triggerInterval int = 3
-param container string =  'avdtest2'
+param container string = 'avdtest2'
 param hostPoolName string = 'ProdMirror'
 param checkBothCreatedAndModifiedDateTime bool = false
 param maxFileCount int = 10
+
+param clientId string = 'd3e8677d-b330-4546-988c-d678dcdf79ff'
+
+var subscriptionId = subscription().subscriptionId
+var tenantId = subscription().tenantId
 
 // Storage account name
 param storageAccountName string = 'avdtest2'
@@ -52,31 +54,44 @@ param apiType string = 'Microsoft.Web/locations/managedApis'
 param description string = 'Azure Automation provides tools to manage your cloud and on-premises infrastructure seamlessly.'
 param brandColor string = '#56A0D7'
 
+param uris array = [
+  'https://raw.githubusercontent.com/jamasten/Azure/master/solutions/scalingAutomation/scale.ps1'
+]
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
-    name: keyVaultName
-    scope: resourceGroup(subscriptionId, keyVaultResourceGroup )
-  }
+  name: keyVaultName
+  scope: resourceGroup(subscriptionId, keyVaultResourceGroup)
+}
 
-module automationAccountConnection 'modules/automationAccountConnection.bicep'= {
-  name: 'automationAccount'
+module automationAcccount 'modules/automationAccount.bicep' = [for uri in uris: {
+  name: 'automationAccount-${uri}-deployment-${deploymentNameSuffix}'
+  scope: resourceGroup(subscriptionId, automationAccountResourceGroup)
+  params: {
+    automationAccountName: automationAccountName
+    location: location
+    uri: uri
+  }
+}]
+
+module automationAccountConnection 'modules/automationAccountConnection.bicep' = {
+  name: 'automationAccountConnection-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
     clientSecret: keyVault.getSecret('clientsecret')
     location: location
     connection_azureautomation_name: automationAccountConnectionName
-    subscriptionId:subscriptionId
+    subscriptionId: subscriptionId
     tenantId: tenantId
-    clientId:clientId
+    clientId: clientId
     displayName: automationAccountConnectionName
-    iconUri:iconUri
-    apiType:apiType
-    description:description
-    brandColor:brandColor
+    iconUri: iconUri
+    apiType: apiType
+    description: description
+    brandColor: brandColor
   }
 }
 
-module blobConnection 'modules/blobConnection.bicep'= {
+module blobConnection 'modules/blobConnection.bicep' = {
   name: 'blobConnection-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
@@ -90,25 +105,25 @@ module getImageVersionlogicApp 'modules/logicapp_getimageversion.bicep' = {
   name: 'getImageVersionlogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
-  subscriptionId:subscriptionId
-  workflows_GetImageVersion_name:workflows_GetImageVersion_name
-  automationAccountConnectionName: automationAccountConnectionName
-  location:location
-  state:state
-  recurrenceFrequency:recurrenceFrequency
-  recurrenceType:recurrenceType
-  recurrenceInterval:recurrenceInterval
-  automationAccountName:automationAccountName
-  automationAccountLocation:automationAccountLocation
-  automationAccountResourceGroup:automationAccountResourceGroup
-  runbookNewHostPoolRipAndReplace:runbookNewHostPoolRipAndReplace
-  getRunbookScheduleRunbookName:runbookScheduleRunbookName
-  getRunbookGetSessionHostVm:runbookGetSessionHostVm
-  getGetMarketPlaceImageVersion:runbookMarketPlaceImageVersion
-  waitForRunBook:waitForRunBook
-  falseExpression:falseExpression
-  trueExpression:trueExpression
-  hostPoolName:hostPoolName
+    subscriptionId: subscriptionId
+    workflows_GetImageVersion_name: workflows_GetImageVersion_name
+    automationAccountConnectionName: automationAccountConnectionName
+    location: location
+    state: state
+    recurrenceFrequency: recurrenceFrequency
+    recurrenceType: recurrenceType
+    recurrenceInterval: recurrenceInterval
+    automationAccountName: automationAccountName
+    automationAccountLocation: automationAccountLocation
+    automationAccountResourceGroup: automationAccountResourceGroup
+    runbookNewHostPoolRipAndReplace: runbookNewHostPoolRipAndReplace
+    getRunbookScheduleRunbookName: runbookScheduleRunbookName
+    getRunbookGetSessionHostVm: runbookGetSessionHostVm
+    getGetMarketPlaceImageVersion: runbookMarketPlaceImageVersion
+    waitForRunBook: waitForRunBook
+    falseExpression: falseExpression
+    trueExpression: trueExpression
+    hostPoolName: hostPoolName
   }
   dependsOn: [
     automationAccountConnection
@@ -119,8 +134,8 @@ module getImageVersionlogicApp 'modules/logicapp_getimageversion.bicep' = {
 module getBlobUpdateLogicApp 'modules/logicapp_getblobupdate.bicep' = {
   name: 'getBlobUpdateLogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, resourceGroupName)
-  params:{
-    location:location
+  params: {
+    location: location
     workflows_GetBlobUpdate_name: workflows_GetBlobUpdate_name
     automationAccountConnectionName: automationAccountConnectionName
     automationAccountName: automationAccountName
