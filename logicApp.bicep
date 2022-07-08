@@ -6,7 +6,7 @@ param keyVaultResourceGroup string = 'rg-baseline-til-001'
 param location string = 'usgovvirginia'
 
 // Automation Account Parameters
-param automationAccountConnectionName string = 'azureautomation'
+param automationAccountConnectionName string = 'test'
 param automationAccountName string = 'avdtest'
 param automationAccountResourceGroup string = 'avdtest'
 param automationAccountLocation string = 'usgovvirginia'
@@ -16,7 +16,7 @@ param runbookGetSessionHostVm string = 'Get-SessionHostVirtualMachine'
 param runbookMarketPlaceImageVersion string = 'Get-MarketPlaceImageVersion'
 
 // GetImageVersion Logic App Parameters
-param workflows_GetImageVersion_name string = 'GetImageVersion'
+param workflows_GetImageVersion_name string = 'GetImageVersion-demo'
 param recurrenceFrequency string = 'Minute'
 param recurrenceInterval int = 5
 param recurrenceType string = 'Recurrence'
@@ -25,7 +25,7 @@ param falseExpression bool = false
 param trueExpression bool = true
 
 // Get BlobUpdate Logic App Parameters
-param workflows_GetBlobUpdate_name string = 'GetBlobUpdate'
+param workflows_GetBlobUpdate_name string = 'GetBlobUpdate-demo'
 param blobConnectionName string = 'azureblob'
 param identityType string = 'SystemAssigned'
 param state string = 'Enabled'
@@ -68,7 +68,7 @@ var runbooks  = [
   }
   {
     name: 'New-HostPoolRipAndReplace'
-    uri: 'https://github.com/mikedzikowski/logicapps/blob/main/runbooks/New-HostPoolRipAndReplace.ps1'
+    uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/New-HostPoolRipAndReplace.ps1'
   }
 ]
 
@@ -116,7 +116,7 @@ module blobConnection 'modules/blobConnection.bicep' = {
   }
 }
 
-module getImageVersionlogicApp 'modules/logicapp_getimageversion.bicep' = {
+module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
   name: 'getImageVersionlogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
@@ -139,6 +139,7 @@ module getImageVersionlogicApp 'modules/logicapp_getimageversion.bicep' = {
     falseExpression: falseExpression
     trueExpression: trueExpression
     hostPoolName: hostPoolName
+    identityType:identityType
   }
   dependsOn: [
     automationAcccount
@@ -147,7 +148,7 @@ module getImageVersionlogicApp 'modules/logicapp_getimageversion.bicep' = {
   ]
 }
 
-module getBlobUpdateLogicApp 'modules/logicapp_getblobupdate.bicep' = {
+module getBlobUpdateLogicApp 'modules/logicAppGetBlobUpdate.bicep' = {
   name: 'getBlobUpdateLogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {

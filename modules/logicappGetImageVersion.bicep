@@ -17,12 +17,16 @@ param waitForRunBook bool
 param falseExpression bool
 param trueExpression bool
 param hostPoolName string
+param identityType string
 
 
 resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetImageVersion_name
 
   location: location
+  identity: {
+    type: identityType
+  }
   properties: {
     state: state
     definition: {
@@ -322,7 +326,10 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
         value: {
           azureautomation: {
             connectionId: '/subscriptions/${subscriptionId}/resourceGroups/${automationAccountResourceGroup}/providers/Microsoft.Web/connections/${automationAccountConnectionName}'
-            connectionName: 'azureautomation'
+            connectionName: automationAccountConnectionName
+            authentication: {
+              type: 'ManagedServiceIdentity'
+          }
             id: concat('/subscriptions/${subscriptionId}/providers/Microsoft.Web/locations/${automationAccountLocation}/managedApis/azureautomation')
           }
         }
