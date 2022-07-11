@@ -6,7 +6,7 @@ param keyVaultResourceGroup string = 'rg-baseline-til-001'
 param location string = 'usgovvirginia'
 
 // Automation Account Parameters
-param automationAccountConnectionName string = 'test'
+param automationAccountConnectionName string = 'azureautomation'
 param automationAccountName string = 'avdtest'
 param automationAccountResourceGroup string = 'avdtest'
 param automationAccountLocation string = 'usgovvirginia'
