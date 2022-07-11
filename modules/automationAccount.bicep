@@ -1,8 +1,6 @@
 param location string
 param automationAccountName string
-@secure()
-param uri string
-param runbookName string
+param runbookNames array
 
 resource automationAccount 'Microsoft.Automation/automationAccounts@2021-06-22' = {
   name: automationAccountName
@@ -14,11 +12,15 @@ resource automationAccount 'Microsoft.Automation/automationAccounts@2021-06-22' 
     sku: {
       name: 'Basic'
     }
+    encryption: {
+      keySource: 'Microsoft.Automation'
+      identity: {}
+    }
   }
 }
 
-resource runbook 'Microsoft.Automation/automationAccounts/runbooks@2019-06-01' = {
-  name: runbookName
+resource runbookDeployment 'Microsoft.Automation/automationAccounts/runbooks@2019-06-01'  = [for (runbook, i) in runbookNames: {
+  name: runbook.name
   parent: automationAccount
   location: location
   properties: {
@@ -26,8 +28,10 @@ resource runbook 'Microsoft.Automation/automationAccounts/runbooks@2019-06-01' =
     logProgress: true
     logVerbose: true
     publishContentLink: {
-      uri: uri
+      uri: runbook.uri
       version: '1.0.0.0'
     }
   }
-}
+}]
+
+output aaIdentityId string = automationAccount.identity.principalId

@@ -1,3 +1,5 @@
+targetScope = 'subscription'
+
 // Environment Parameters
 param deploymentNameSuffix string = utcNow()
 param resourceGroupName string = 'avdtest'
@@ -46,6 +48,8 @@ param storageAccountName string = 'avdtest2'
 // Role Id
 param roleId string = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 
+param avdResourceGroupName string = 'rg-sharedservices-til-001'
+
 var runbooks = [
   {
     name: 'Get-RunBookSchedule'
@@ -65,16 +69,15 @@ var runbooks = [
   }
 ]
 
-module automationAcccount 'modules/automationAccount.bicep' = [for (runbook, i) in runbooks: {
-  name: '${automationAccountName}${runbook.name}${i}'
+module automationAccount 'modules/automationAccount.bicep' = {
+  name: automationAccountName
   scope: resourceGroup(subscriptionId, automationAccountResourceGroup)
   params: {
     automationAccountName: automationAccountName
     location: location
-    uri: runbook.uri
-    runbookName: runbook.name
+    runbookNames: runbooks
   }
-}]
+}
 
 module automationAccountConnection 'modules/automationAccountConnection.bicep' = {
   name: 'automationAccountConnection-deployment-${deploymentNameSuffix}'
@@ -99,12 +102,13 @@ module blobConnection 'modules/blobConnection.bicep' = {
 
 module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = {
   name: 'rbac-AAConnector-deployment-${deploymentNameSuffix}'
+  scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
     principalId: getImageVersionlogicApp.outputs.imagePrincipalId
     roleId: roleId
   }
   dependsOn: [
-    automationAcccount
+    automationAccount
     automationAccountConnection
     blobConnection
     getBlobUpdateLogicApp
@@ -114,12 +118,30 @@ module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = 
 
 module blobPermissionConnector 'modules/rbacPermissions.bicep' = {
   name: 'rbac-blobConnector-deployment-${deploymentNameSuffix}'
+  scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
     principalId: getBlobUpdateLogicApp.outputs.blobPrincipalId
     roleId: roleId
   }
   dependsOn: [
-    automationAcccount
+    automationAccount
+    automationAccountConnection
+    blobConnection
+    getBlobUpdateLogicApp
+    getImageVersionlogicApp
+  ]
+}
+
+
+module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
+  name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
+  scope:resourceGroup(subscriptionId, avdResourceGroupName)
+  params: {
+    principalId: automationAccount.outputs.aaIdentityId
+    roleId: roleId
+  }
+  dependsOn: [
+    automationAccount
     automationAccountConnection
     blobConnection
     getBlobUpdateLogicApp
@@ -153,7 +175,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     identityType: identityType
   }
   dependsOn: [
-    automationAcccount
+    automationAccount
     automationAccountConnection
     blobConnection
   ]
@@ -186,7 +208,7 @@ module getBlobUpdateLogicApp 'modules/logicAppGetBlobUpdate.bicep' = {
     runbookNewHostPoolRipAndReplace: runbookNewHostPoolRipAndReplace
   }
   dependsOn: [
-    automationAcccount
+    automationAccount
     automationAccountConnection
     blobConnection
   ]

@@ -7,7 +7,7 @@ param (
 
 # Connect using a Managed Service Identity
 try {
-    $AzureContext = (Connect-AzAccount -Identity).context
+    $AzureContext = (Connect-AzAccount -Identity -Environment AzureUSGovernment).context
 }
 catch{
     Write-Output "There is no system-assigned user identity. Aborting.";

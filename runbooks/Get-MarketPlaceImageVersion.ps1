@@ -6,30 +6,16 @@ param (
 	[parameter(mandatory = $true)]$resourceGroupName
 )
 
-
-$connectionName = "AzureRunAsConnection"
-try
-{
-    # Get the connection "AzureRunAsConnection "
-    $servicePrincipalConnection=Get-AutomationConnection -Name $connectionName
-
-    Add-AzAccount `
-        -ServicePrincipal `
-        -TenantId $servicePrincipalConnection.TenantId `
-        -ApplicationId $servicePrincipalConnection.ApplicationId `
-        -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint `
-        -EnvironmentName AzureUSGovernment | Out-Null
- }
-catch {
-    if (!$servicePrincipalConnection)
-    {
-        $ErrorMessage = "Connection $connectionName not found."
-        throw $ErrorMessage
-    } else{
-        Write-Error -Message $_.Exception
-        throw $_.Exception
-    }
+# Connect using a Managed Service Identity
+try {
+    $AzureContext = (Connect-AzAccount -Identity -Environment AzureUSGovernment).context
 }
+catch{
+    Write-Output "There is no system-assigned user identity. Aborting.";
+    exit
+}
+
+$AzureContext = Set-AzContext -SubscriptionName $AzureContext.Subscription -DefaultProfile $AzureContext
 
 
 $hostpoolvm = Get-AzVM -ResourceGroupName $resourceGroupName -Name $vmName
