@@ -1,8 +1,6 @@
 // Environment Parameters
 param deploymentNameSuffix string = utcNow()
 param resourceGroupName string = 'avdtest'
-param keyVaultName string = 'kv-baseline-til-001'
-param keyVaultResourceGroup string = 'rg-baseline-til-001'
 param location string = 'usgovvirginia'
 
 // Automation Account Parameters
@@ -16,7 +14,7 @@ param runbookGetSessionHostVm string = 'Get-SessionHostVirtualMachine'
 param runbookMarketPlaceImageVersion string = 'Get-MarketPlaceImageVersion'
 
 // GetImageVersion Logic App Parameters
-param workflows_GetImageVersion_name string = 'GetImageVersion-demo'
+param workflows_GetImageVersion_name string = 'GetImageVersion-demo2'
 param recurrenceFrequency string = 'Minute'
 param recurrenceInterval int = 5
 param recurrenceType string = 'Recurrence'
@@ -25,7 +23,7 @@ param falseExpression bool = false
 param trueExpression bool = true
 
 // Get BlobUpdate Logic App Parameters
-param workflows_GetBlobUpdate_name string = 'GetBlobUpdate-demo'
+param workflows_GetBlobUpdate_name string = 'GetBlobUpdate-demo2'
 param blobConnectionName string = 'azureblob'
 param identityType string = 'SystemAssigned'
 param state string = 'Enabled'
@@ -40,20 +38,15 @@ param checkBothCreatedAndModifiedDateTime bool = false
 param maxFileCount int = 10
 
 // Variables
-var clientId = 'd3e8677d-b330-4546-988c-d678dcdf79ff'
 var subscriptionId = subscription().subscriptionId
-var tenantId = subscription().tenantId
 
 // Storage account name
 param storageAccountName string = 'avdtest2'
 
-// Service principal information
-param iconUri string = 'https://connectoricons-prod.azureedge.net/releases/v1.0.1538/1.0.1538.2619/azureautomation/icon.png'
-param apiType string = 'Microsoft.Web/locations/managedApis'
-param description string = 'Azure Automation provides tools to manage your cloud and on-premises infrastructure seamlessly.'
-param brandColor string = '#56A0D7'
+// Role Id
+param roleId string = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 
-var runbooks  = [
+var runbooks = [
   {
     name: 'Get-RunBookSchedule'
     uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-RunBookSchedule.ps1'
@@ -63,7 +56,7 @@ var runbooks  = [
     uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-MarketPlaceImageVersion.ps1'
   }
   {
-    name:'Get-SessionHostVirtualMachine'
+    name: 'Get-SessionHostVirtualMachine'
     uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-SessionHostVirtualMachine.ps1'
   }
   {
@@ -72,12 +65,7 @@ var runbooks  = [
   }
 ]
 
-resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' existing = {
-  name: keyVaultName
-  scope: resourceGroup(subscriptionId, keyVaultResourceGroup)
-}
-
-module automationAcccount 'modules/automationAccount.bicep' = [for (runbook, i) in runbooks :  {
+module automationAcccount 'modules/automationAccount.bicep' = [for (runbook, i) in runbooks: {
   name: '${automationAccountName}${runbook.name}${i}'
   scope: resourceGroup(subscriptionId, automationAccountResourceGroup)
   params: {
@@ -92,17 +80,10 @@ module automationAccountConnection 'modules/automationAccountConnection.bicep' =
   name: 'automationAccountConnection-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
-    clientSecret: keyVault.getSecret('clientsecret')
     location: location
     connection_azureautomation_name: automationAccountConnectionName
     subscriptionId: subscriptionId
-    tenantId: tenantId
-    clientId: clientId
     displayName: automationAccountConnectionName
-    iconUri: iconUri
-    apiType: apiType
-    description: description
-    brandColor: brandColor
   }
 }
 
@@ -114,6 +95,36 @@ module blobConnection 'modules/blobConnection.bicep' = {
     storageName: storageAccountName
     name: blobConnectionName
   }
+}
+
+module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = {
+  name: 'rbac-AAConnector-deployment-${deploymentNameSuffix}'
+  params: {
+    principalId: getImageVersionlogicApp.outputs.imagePrincipalId
+    roleId: roleId
+  }
+  dependsOn: [
+    automationAcccount
+    automationAccountConnection
+    blobConnection
+    getBlobUpdateLogicApp
+    getImageVersionlogicApp
+  ]
+}
+
+module blobPermissionConnector 'modules/rbacPermissions.bicep' = {
+  name: 'rbac-blobConnector-deployment-${deploymentNameSuffix}'
+  params: {
+    principalId: getBlobUpdateLogicApp.outputs.blobPrincipalId
+    roleId: roleId
+  }
+  dependsOn: [
+    automationAcccount
+    automationAccountConnection
+    blobConnection
+    getBlobUpdateLogicApp
+    getImageVersionlogicApp
+  ]
 }
 
 module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
@@ -139,7 +150,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     falseExpression: falseExpression
     trueExpression: trueExpression
     hostPoolName: hostPoolName
-    identityType:identityType
+    identityType: identityType
   }
   dependsOn: [
     automationAcccount

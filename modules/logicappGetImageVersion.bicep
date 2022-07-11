@@ -22,7 +22,6 @@ param identityType string
 
 resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetImageVersion_name
-
   location: location
   identity: {
     type: identityType
@@ -327,8 +326,10 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
           azureautomation: {
             connectionId: '/subscriptions/${subscriptionId}/resourceGroups/${automationAccountResourceGroup}/providers/Microsoft.Web/connections/${automationAccountConnectionName}'
             connectionName: automationAccountConnectionName
+            connectionProperties:{
             authentication: {
               type: 'ManagedServiceIdentity'
+            }
           }
             id: concat('/subscriptions/${subscriptionId}/providers/Microsoft.Web/locations/${automationAccountLocation}/managedApis/azureautomation')
           }
@@ -337,3 +338,5 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
     }
   }
 }
+
+output imagePrincipalId string = workflows_GetImageVersion_name_resource.identity.principalId

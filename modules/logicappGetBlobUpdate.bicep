@@ -271,6 +271,9 @@ resource workflows_GetBlobUpdate_name_resource 'Microsoft.Logic/workflows@2017-0
             connectionId: '/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/connections/${automationAccountConnectionName}'
             connectionName: automationAccountConnectionName
             connectionProperties: {
+              authentication: {
+              type: 'ManagedServiceIdentity'
+             }
             }
             id: '/subscriptions/${subscriptionId}/providers/Microsoft.Web/locations/${location}/managedApis/azureautomation'
           }
@@ -284,3 +287,5 @@ resource workflows_GetBlobUpdate_name_resource 'Microsoft.Logic/workflows@2017-0
     }
   }
 }
+
+output blobPrincipalId string = workflows_GetBlobUpdate_name_resource.identity.principalId
