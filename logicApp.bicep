@@ -116,7 +116,7 @@ module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = 
   ]
 }
 
-module blobPermissionConnector 'modules/rbacPermissions.bicep' = {
+module rbacblobPermissionConnector 'modules/rbacPermissions.bicep' = {
   name: 'rbac-blobConnector-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, resourceGroupName)
   params: {
