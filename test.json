@@ -1,0 +1,12 @@
+{
+    "properties": {
+        "api": {
+            "id": "/subscriptions/f4972a61-1083-4904-a4e2-a790107320bf/providers/Microsoft.Web/locations/usgovvirginia/managedApis/azureautomation"
+        },
+        "parameterValueType": "Alternative",
+        "alternativeParameterValues": {},
+        "displayName": "test"
+    },
+    "kind": "V1",
+    "location": "usgovvirginia"
+}
