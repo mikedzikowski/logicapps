@@ -69,6 +69,17 @@ var runbooks = [
   }
 ]
 
+module storageAccount 'modules/storageAccount.bicep' = {
+ name: storageAccountName
+ scope: resourceGroup(subscriptionId, resourceGroupName)
+ params:{
+  storageAccountName:storageAccountName
+  location:location
+  storageAccountType: 'Standard_LRS'
+  containerName: container
+ }
+}
+
 module automationAccount 'modules/automationAccount.bicep' = {
   name: automationAccountName
   scope: resourceGroup(subscriptionId, automationAccountResourceGroup)
@@ -113,6 +124,7 @@ module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = 
     blobConnection
     getBlobUpdateLogicApp
     getImageVersionlogicApp
+    storageAccount
   ]
 }
 
@@ -129,6 +141,7 @@ module rbacBlobPermissionConnector 'modules/rbacPermissions.bicep' = {
     blobConnection
     getBlobUpdateLogicApp
     getImageVersionlogicApp
+    storageAccount
   ]
 }
 
@@ -145,6 +158,7 @@ module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
     blobConnection
     getBlobUpdateLogicApp
     getImageVersionlogicApp
+    storageAccount
   ]
 }
 
@@ -177,6 +191,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     automationAccount
     automationAccountConnection
     blobConnection
+    storageAccount
   ]
 }
 
@@ -210,5 +225,6 @@ module getBlobUpdateLogicApp 'modules/logicAppGetBlobUpdate.bicep' = {
     automationAccount
     automationAccountConnection
     blobConnection
+    storageAccount
   ]
 }
