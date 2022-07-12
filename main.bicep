@@ -132,7 +132,6 @@ module rbacBlobPermissionConnector 'modules/rbacPermissions.bicep' = {
   ]
 }
 
-
 module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
   name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
   scope:resourceGroup(subscriptionId, avdResourceGroupName)
