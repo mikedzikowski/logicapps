@@ -1,0 +1,108 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "deploymentNameSuffix": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "resourceGroupName": {
+            "value": "avdtest"
+        },
+        "location": {
+            "value": "usgovvirginia"
+        },
+        "automationAccountConnectionName": {
+            "value": "azureautomation"
+        },
+        "automationAccountName": {
+            "value": "avdtest"
+        },
+        "automationAccountResourceGroup": {
+            "value": "avdtest"
+        },
+        "automationAccountLocation": {
+            "value": "usgovvirginia"
+        },
+        "runbookNewHostPoolRipAndReplace": {
+            "value": "New-HostPoolRipAndReplace"
+        },
+        "runbookScheduleRunbookName": {
+            "value": "Get-RunBookSchedule"
+        },
+        "runbookGetSessionHostVm": {
+            "value": "Get-SessionHostVirtualMachine"
+        },
+        "runbookMarketPlaceImageVersion": {
+            "value": "Get-MarketPlaceImageVersion"
+        },
+        "workflows_GetImageVersion_name": {
+            "value": "GetImageVersion-demo2"
+        },
+        "recurrenceFrequency": {
+            "value": "Minute"
+        },
+        "recurrenceInterval": {
+            "value": 5
+        },
+        "recurrenceType": {
+            "value": "Recurrence"
+        },
+        "waitForRunBook": {
+            "value": true
+        },
+        "falseExpression": {
+            "value": false
+        },
+        "trueExpression": {
+            "value": true
+        },
+        "workflows_GetBlobUpdate_name": {
+            "value": "GetBlobUpdate-demo2"
+        },
+        "blobConnectionName": {
+            "value": "azureblob"
+        },
+        "identityType": {
+            "value": "SystemAssigned"
+        },
+        "state": {
+            "value": "Enabled"
+        },
+        "schema": {
+            "value": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#"
+        },
+        "contentVersion": {
+            "value": "1.0.0.0"
+        },
+        "connectionType": {
+            "value": "Object"
+        },
+        "triggerFrequency": {
+            "value": "Minute"
+        },
+        "triggerInterval": {
+            "value": 3
+        },
+        "container": {
+            "value": "avdtest2"
+        },
+        "hostPoolName": {
+            "value": "ProdMirror"
+        },
+        "checkBothCreatedAndModifiedDateTime": {
+            "value": false
+        },
+        "maxFileCount": {
+            "value": 10
+        },
+        "storageAccountName": {
+            "value": "avdtest2"
+        },
+        "roleId": {
+            "value": "b24988ac-6180-42a0-ab88-20f7382dd24c"
+        },
+        "avdResourceGroupName": {
+            "value": "rg-sharedservices-til-001"
+        }
+    }
+}
