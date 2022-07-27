@@ -41,7 +41,7 @@ param maxFileCount int = 10
 
 // Storage account name
 param storageAccountName string = 'avdtest2'
-param storageaAccountResourceGroupName string = '' 
+param storageaAccountResourceGroupName string = 'avdtest2'
 
 // Role Id - make variable
 param roleId string = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
