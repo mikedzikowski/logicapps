@@ -41,12 +41,13 @@ param maxFileCount int = 10
 
 // Storage account name
 param storageAccountName string = 'avdtest2'
+param storageaAccountResourceGroupName string = '' 
 
-// Role Id
+// Role Id - make variable
 param roleId string = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 
 // AVD resource group
-param avdResourceGroupName string = 'rg-sharedservices-til-001'
+param hostPoolResourceGroupName string = 'rg-sharedservices-til-001'
 
 // Variables
 var subscriptionId = subscription().subscriptionId
@@ -71,7 +72,7 @@ var runbooks = [
 
 module storageAccount 'modules/storageAccount.bicep' = {
  name: storageAccountName
- scope: resourceGroup(subscriptionId, resourceGroupName)
+ scope: resourceGroup(subscriptionId, storageaAccountResourceGroupName)
  params:{
   storageAccountName:storageAccountName
   location:location
@@ -147,7 +148,7 @@ module rbacBlobPermissionConnector 'modules/rbacPermissions.bicep' = {
 
 module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
   name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
-  scope:resourceGroup(subscriptionId, avdResourceGroupName)
+  scope:resourceGroup(subscriptionId, hostPoolResourceGroupName)
   params: {
     principalId: automationAccount.outputs.aaIdentityId
     roleId: roleId
