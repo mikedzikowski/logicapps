@@ -40,8 +40,8 @@ param checkBothCreatedAndModifiedDateTime bool = false
 param maxFileCount int = 10
 
 // Storage account name
-param storageAccountName string = 'avdtest2'
-param storageaAccountResourceGroupName string = 'avdtest2'
+param storageAccountName string = 'avdtestdeployment'
+param storageAccountResourceGroupName string = 'avdtest2'
 
 // Role Id - make variable
 param roleId string = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
@@ -72,7 +72,7 @@ var runbooks = [
 
 module storageAccount 'modules/storageAccount.bicep' = {
  name: storageAccountName
- scope: resourceGroup(subscriptionId, storageaAccountResourceGroupName)
+ scope: resourceGroup(subscriptionId, storageAccountResourceGroupName)
  params:{
   storageAccountName:storageAccountName
   location:location
@@ -104,7 +104,7 @@ module automationAccountConnection 'modules/automationAccountConnection.bicep' =
 
 module blobConnection 'modules/blobConnection.bicep' = {
   name: 'blobConnection-deployment-${deploymentNameSuffix}'
-  scope: resourceGroup(subscriptionId, resourceGroupName)
+  scope: resourceGroup(subscriptionId, storageAccountResourceGroupName)
   params: {
     location: location
     storageName: storageAccountName
