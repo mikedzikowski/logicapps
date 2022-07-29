@@ -1,18 +1,19 @@
 targetScope = 'subscription'
 
-// Environment Parameters
-// param resourceGroupName string = 'avdtest'
 param location string = 'usgovvirginia'
 
 // Environment
-
+@allowed([
+  'production'
+  'development'
+])
 param Environment string = 'production'
 
 // Automation Account Parameters
 param automationAccountName string = 'aa-logic-app'
 
 // GetImageVersion Logic App Parameters
-param workflows_GetImageVersion_name string = 'GetImageVersion-demo2'
+param workflows_GetImageVersion_name string = 'GetImageVersionLogicApp'
 
 @allowed([
   'Month'
@@ -27,8 +28,8 @@ param recurrenceInterval int = 1
 
 
 // Get BlobUpdate Logic App Parameters
-param workflows_GetBlobUpdate_name string = 'GetBlobUpdate-demo2'
-param container string = 'avdtest2'
+param workflows_GetBlobUpdate_name string = 'GetBlobUpdateLogicApp'
+param container string = 'container'
 param hostPoolName string = 'ProdMirror'
 
 @allowed([
@@ -43,13 +44,13 @@ param triggerFrequency string = 'Day'
 param triggerInterval int = 1
 
 // Storage account name
-param storageAccountName string = 'avdtestdeployment2'
+param storageAccountName string = 'salogicapp'
+
+// Exisiting AVD resource group
+param hostPoolResourceGroupName string = 'rg-sharedservices-til-001'
 
 // UTC
 param deploymentNameSuffix string  = utcNow()
-
-// AVD resource group
-param hostPoolResourceGroupName string = 'rg-sharedservices-til-001'
 
 // Variables
 var subscriptionId = subscription().subscriptionId
@@ -146,6 +147,7 @@ var LocationShortNames = {
 var LocationShortName = LocationShortNames[location]
 var NamingStandard = '${Environment}-${LocationShortName}'
 
+// Resource Group Naming
 var ResourceGroups = [
   'rg-${NamingStandard}-aa'
   'rg-${NamingStandard}-la'
