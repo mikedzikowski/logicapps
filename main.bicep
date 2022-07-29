@@ -1,56 +1,76 @@
 targetScope = 'subscription'
 
 // Environment Parameters
-param deploymentNameSuffix string = utcNow()
-param resourceGroupName string = 'avdtest'
+// param resourceGroupName string = 'avdtest'
 param location string = 'usgovvirginia'
 
+// Environment
+
+param Environment string = 'production'
+
 // Automation Account Parameters
-param automationAccountConnectionName string = 'azureautomation'
-param automationAccountName string = 'avdtest'
-param automationAccountResourceGroup string = 'avdtest'
-param automationAccountLocation string = 'usgovvirginia'
-param runbookNewHostPoolRipAndReplace string = 'New-HostPoolRipAndReplace'
-param runbookScheduleRunbookName string = 'Get-RunBookSchedule'
-param runbookGetSessionHostVm string = 'Get-SessionHostVirtualMachine'
-param runbookMarketPlaceImageVersion string = 'Get-MarketPlaceImageVersion'
+param automationAccountName string = 'aa-logic-app'
 
 // GetImageVersion Logic App Parameters
 param workflows_GetImageVersion_name string = 'GetImageVersion-demo2'
-param recurrenceFrequency string = 'Minute'
-param recurrenceInterval int = 5
-param recurrenceType string = 'Recurrence'
-param waitForRunBook bool = true
-param falseExpression bool = false
-param trueExpression bool = true
+
+@allowed([
+  'Month'
+  'Week'
+  'Day'
+  'Hour'
+  'Minute'
+  'Second'
+])
+param recurrenceFrequency string = 'Day'
+param recurrenceInterval int = 1
+
 
 // Get BlobUpdate Logic App Parameters
 param workflows_GetBlobUpdate_name string = 'GetBlobUpdate-demo2'
-param blobConnectionName string = 'azureblob'
-param identityType string = 'SystemAssigned'
-param state string = 'Enabled'
-param schema string = 'https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#'
-param contentVersion string = '1.0.0.0'
-param connectionType string = 'Object'
-param triggerFrequency string = 'Minute'
-param triggerInterval int = 3
 param container string = 'avdtest2'
 param hostPoolName string = 'ProdMirror'
-param checkBothCreatedAndModifiedDateTime bool = false
-param maxFileCount int = 10
+
+@allowed([
+  'Month'
+  'Week'
+  'Day'
+  'Hour'
+  'Minute'
+  'Second'
+])
+param triggerFrequency string = 'Day'
+param triggerInterval int = 1
 
 // Storage account name
-param storageAccountName string = 'avdtestdeployment'
-param storageAccountResourceGroupName string = 'avdtest2'
+param storageAccountName string = 'avdtestdeployment2'
 
-// Role Id - make variable
-param roleId string = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+// UTC
+param deploymentNameSuffix string  = utcNow()
 
 // AVD resource group
 param hostPoolResourceGroupName string = 'rg-sharedservices-til-001'
 
 // Variables
 var subscriptionId = subscription().subscriptionId
+var recurrenceType = 'Recurrence'
+var waitForRunBook = true
+var falseExpression = false
+var trueExpression = true
+var automationAccountConnectionName = 'azureautomation'
+var blobConnectionName = 'azureblob'
+var identityType = 'SystemAssigned'
+var state = 'Enabled'
+var schema  = 'https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#'
+var contentVersion = '1.0.0.0'
+var connectionType = 'Object'
+var checkBothCreatedAndModifiedDateTime = false
+var maxFileCount = 10
+var roleId = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
+var runbookNewHostPoolRipAndReplace  = 'New-HostPoolRipAndReplace'
+var runbookScheduleRunbookName = 'Get-RunBookSchedule'
+var runbookGetSessionHostVm = 'Get-SessionHostVirtualMachine'
+var runbookMarketPlaceImageVersion  = 'Get-MarketPlaceImageVersion'
 var runbooks = [
   {
     name: 'Get-RunBookSchedule'
@@ -70,51 +90,138 @@ var runbooks = [
   }
 ]
 
+var LocationShortNames = {
+  australiacentral: 'ac'
+  australiacentral2: 'ac2'
+  australiaeast: 'ae'
+  australiasoutheast: 'as'
+  brazilsouth: 'bs2'
+  brazilsoutheast: 'bs'
+  canadacentral: 'cc'
+  canadaeast: 'ce'
+  centralindia: 'ci'
+  centralus: 'cu'
+  eastasia: 'ea'
+  eastus: 'eu'
+  eastus2: 'eu2'
+  francecentral: 'fc'
+  francesouth: 'fs'
+  germanynorth: 'gn'
+  germanywestcentral: 'gwc'
+  japaneast: 'je'
+  japanwest: 'jw'
+  jioindiacentral: 'jic'
+  jioindiawest: 'jiw'
+  koreacentral: 'kc'
+  koreasouth: 'ks'
+  northcentralus: 'ncu'
+  northeurope: 'ne'
+  norwayeast: 'ne2'
+  norwaywest: 'nw'
+  southafricanorth: 'san'
+  southafricawest: 'saw'
+  southcentralus: 'scu'
+  southeastasia: 'sa'
+  southindia: 'si'
+  swedencentral: 'sc'
+  switzerlandnorth: 'sn'
+  switzerlandwest: 'sw'
+  uaecentral: 'uc'
+  uaenorth: 'un'
+  uksouth: 'us'
+  ukwest: 'uw'
+  usdodcentral: 'uc'
+  usdodeast: 'ue'
+  usgovarizona: 'az'
+  usgoviowa: 'ia'
+  usgovtexas: 'tx'
+  usgovvirginia: 'va'
+  westcentralus: 'wcu'
+  westeurope: 'we'
+  westindia: 'wi'
+  westus: 'wu'
+  westus2: 'wu2'
+  westus3: 'wu3'
+}
+var LocationShortName = LocationShortNames[location]
+var NamingStandard = '${Environment}-${LocationShortName}'
+
+var ResourceGroups = [
+  'rg-${NamingStandard}-aa'
+  'rg-${NamingStandard}-la'
+  'rg-${NamingStandard}-storage'
+]
+
+// Resource Groups needed for the solution
+resource resourceGroups 'Microsoft.Resources/resourceGroups@2020-10-01' = [for i in range(0, length(ResourceGroups)): {
+  name: ResourceGroups[i]
+  location: location
+}]
+
 module storageAccount 'modules/storageAccount.bicep' = {
  name: storageAccountName
- scope: resourceGroup(subscriptionId, storageAccountResourceGroupName)
+ scope: resourceGroup(subscriptionId, ResourceGroups[2])
  params:{
   storageAccountName:storageAccountName
   location:location
   storageAccountType: 'Standard_LRS'
   containerName: container
  }
+ dependsOn: [
+  resourceGroups
+]
 }
 
 module automationAccount 'modules/automationAccount.bicep' = {
   name: automationAccountName
-  scope: resourceGroup(subscriptionId, automationAccountResourceGroup)
+  scope: resourceGroup(subscriptionId, ResourceGroups[0])
   params: {
     automationAccountName: automationAccountName
     location: location
     runbookNames: runbooks
   }
+  dependsOn: [
+    resourceGroups
+  ]
 }
 
 module automationAccountConnection 'modules/automationAccountConnection.bicep' = {
   name: 'automationAccountConnection-deployment-${deploymentNameSuffix}'
-  scope: resourceGroup(subscriptionId, resourceGroupName)
+  scope: resourceGroup(subscriptionId, ResourceGroups[1])
   params: {
     location: location
     connection_azureautomation_name: automationAccountConnectionName
     subscriptionId: subscriptionId
     displayName: automationAccountConnectionName
   }
+  dependsOn: [
+    automationAccount
+    storageAccount
+    resourceGroups
+  ]
 }
 
 module blobConnection 'modules/blobConnection.bicep' = {
   name: 'blobConnection-deployment-${deploymentNameSuffix}'
-  scope: resourceGroup(subscriptionId, storageAccountResourceGroupName)
+  scope: resourceGroup(subscriptionId, ResourceGroups[1])
   params: {
     location: location
     storageName: storageAccountName
     name: blobConnectionName
+    saResourceGroup:ResourceGroups[2]
+    subscriptionId: subscriptionId
   }
+  dependsOn: [
+    automationAccount
+    automationAccountConnection
+    storageAccount
+    resourceGroups
+  ]
 }
 
 module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = {
   name: 'rbac-AAConnector-deployment-${deploymentNameSuffix}'
-  scope: resourceGroup(subscriptionId, resourceGroupName)
+  scope: resourceGroup(subscriptionId, ResourceGroups[0])
   params: {
     principalId: getImageVersionlogicApp.outputs.imagePrincipalId
     roleId: roleId
@@ -126,12 +233,13 @@ module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = 
     getBlobUpdateLogicApp
     getImageVersionlogicApp
     storageAccount
+    resourceGroups
   ]
 }
 
 module rbacBlobPermissionConnector 'modules/rbacPermissions.bicep' = {
   name: 'rbac-blobConnector-deployment-${deploymentNameSuffix}'
-  scope: resourceGroup(subscriptionId, resourceGroupName)
+  scope: resourceGroup(subscriptionId, ResourceGroups[0])
   params: {
     principalId: getBlobUpdateLogicApp.outputs.blobPrincipalId
     roleId: roleId
@@ -143,6 +251,7 @@ module rbacBlobPermissionConnector 'modules/rbacPermissions.bicep' = {
     getBlobUpdateLogicApp
     getImageVersionlogicApp
     storageAccount
+    resourceGroups
   ]
 }
 
@@ -160,12 +269,13 @@ module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
     getBlobUpdateLogicApp
     getImageVersionlogicApp
     storageAccount
+    resourceGroups
   ]
 }
 
 module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
   name: 'getImageVersionlogicApp-deployment-${deploymentNameSuffix}'
-  scope: resourceGroup(subscriptionId, resourceGroupName)
+  scope: resourceGroup(subscriptionId, ResourceGroups[1])
   params: {
     subscriptionId: subscriptionId
     workflows_GetImageVersion_name: workflows_GetImageVersion_name
@@ -176,8 +286,8 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     recurrenceType: recurrenceType
     recurrenceInterval: recurrenceInterval
     automationAccountName: automationAccountName
-    automationAccountLocation: automationAccountLocation
-    automationAccountResourceGroup: automationAccountResourceGroup
+    automationAccountLocation: automationAccount.outputs.aaLocation
+    automationAccountResourceGroup: resourceGroups[0].name
     runbookNewHostPoolRipAndReplace: runbookNewHostPoolRipAndReplace
     getRunbookScheduleRunbookName: runbookScheduleRunbookName
     getRunbookGetSessionHostVm: runbookGetSessionHostVm
@@ -193,18 +303,19 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     automationAccountConnection
     blobConnection
     storageAccount
+    resourceGroups
   ]
 }
 
 module getBlobUpdateLogicApp 'modules/logicAppGetBlobUpdate.bicep' = {
   name: 'getBlobUpdateLogicApp-deployment-${deploymentNameSuffix}'
-  scope: resourceGroup(subscriptionId, resourceGroupName)
+  scope: resourceGroup(subscriptionId, ResourceGroups[1])
   params: {
     location: location
     workflows_GetBlobUpdate_name: workflows_GetBlobUpdate_name
     automationAccountConnectionName: automationAccountConnectionName
     automationAccountName: automationAccountName
-    automationAccountResourceGroup: automationAccountResourceGroup
+    automationAccountResourceGroup: resourceGroups[0].name
     blobConnectionName: blobConnectionName
     identityType: identityType
     state: state
@@ -213,6 +324,7 @@ module getBlobUpdateLogicApp 'modules/logicAppGetBlobUpdate.bicep' = {
     connectionType: connectionType
     triggerFrequency: triggerFrequency
     triggerInterval: triggerInterval
+    storageAccountName: storageAccountName
     container: container
     hostPoolName: hostPoolName
     checkBothCreatedAndModifiedDateTime: checkBothCreatedAndModifiedDateTime
@@ -227,5 +339,6 @@ module getBlobUpdateLogicApp 'modules/logicAppGetBlobUpdate.bicep' = {
     automationAccountConnection
     blobConnection
     storageAccount
+    resourceGroups
   ]
 }

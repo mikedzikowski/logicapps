@@ -324,7 +324,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
       '$connections': {
         value: {
           azureautomation: {
-            connectionId: '/subscriptions/${subscriptionId}/resourceGroups/${automationAccountResourceGroup}/providers/Microsoft.Web/connections/${automationAccountConnectionName}'
+            connectionId: '/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/connections/${automationAccountConnectionName}'
             connectionName: automationAccountConnectionName
             connectionProperties:{
             authentication: {

@@ -35,3 +35,4 @@ resource runbookDeployment 'Microsoft.Automation/automationAccounts/runbooks@201
 }]
 
 output aaIdentityId string = automationAccount.identity.principalId
+output aaLocation string = automationAccount.location

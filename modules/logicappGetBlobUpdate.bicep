@@ -19,6 +19,7 @@ param maxFileCount int
 param runbookNewHostPoolRipAndReplace string
 param runbookGetRunBookSchedule string
 param runbookGetSessionHostVirtualMachine string
+param storageAccountName string
 
 resource workflows_GetBlobUpdate_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetBlobUpdate_name
@@ -60,7 +61,7 @@ resource workflows_GetBlobUpdate_name_resource 'Microsoft.Logic/workflows@2017-0
               }
             }
             method: 'get'
-            path: '/v2/datasets/@{encodeURIComponent(encodeURIComponent(\'${container}\'))}/triggers/batch/onupdatedfile'
+            path: '/v2/datasets/@{encodeURIComponent(encodeURIComponent(\'${storageAccountName}\'))}/triggers/batch/onupdatedfile'
             queries: {
               checkBothCreatedAndModifiedDateTime: checkBothCreatedAndModifiedDateTime
               folderId: '/${container}'
