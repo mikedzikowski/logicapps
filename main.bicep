@@ -6,11 +6,9 @@ param location string = 'usgovvirginia'
 @allowed([
   'production'
   'development'
+  'staging'
 ])
-param Environment string = 'production'
-
-// Automation Account Parameters
-param automationAccountName string = 'aa-logic-app'
+param Environment string = 'staging'
 
 // GetImageVersion Logic App Parameters
 param workflows_GetImageVersion_name string = 'GetImageVersionLogicApp'
@@ -26,6 +24,8 @@ param workflows_GetImageVersion_name string = 'GetImageVersionLogicApp'
 param recurrenceFrequency string = 'Day'
 param recurrenceInterval int = 1
 
+// Email Contact for Approval Flow
+param emailContact string = 'micdz@microsoft.com'
 
 // Get BlobUpdate Logic App Parameters
 param workflows_GetBlobUpdate_name string = 'GetBlobUpdateLogicApp'
@@ -43,9 +43,6 @@ param hostPoolName string = 'ProdMirror'
 param triggerFrequency string = 'Day'
 param triggerInterval int = 1
 
-// Storage account name
-param storageAccountName string = 'salogicapp'
-
 // Exisiting AVD resource group
 param hostPoolResourceGroupName string = 'rg-sharedservices-til-001'
 
@@ -58,6 +55,7 @@ var recurrenceType = 'Recurrence'
 var waitForRunBook = true
 var falseExpression = false
 var trueExpression = true
+var officeConnectionName =  'office365'
 var automationAccountConnectionName = 'azureautomation'
 var blobConnectionName = 'azureblob'
 var identityType = 'SystemAssigned'
@@ -154,6 +152,12 @@ var ResourceGroups = [
   'rg-${NamingStandard}-storage'
 ]
 
+// Storage account name
+var storageAccountName = replace('sa${NamingStandard}','-','')
+
+// Automation Account Parameters
+var automationAccountName = 'aa-${NamingStandard}'
+
 // Resource Groups needed for the solution
 resource resourceGroups 'Microsoft.Resources/resourceGroups@2020-10-01' = [for i in range(0, length(ResourceGroups)): {
   name: ResourceGroups[i]
@@ -221,6 +225,23 @@ module blobConnection 'modules/blobConnection.bicep' = {
   ]
 }
 
+module o365Connection 'modules/officeConnection.bicep' = {
+  name: 'o365Connection-deployment-${deploymentNameSuffix}'
+  scope: resourceGroup(subscriptionId, ResourceGroups[1])
+  params: {
+    displayName: officeConnectionName
+    location: location
+    subscriptionId: subscriptionId
+    connection_azureautomation_name: officeConnectionName
+  }
+  dependsOn: [
+    automationAccount
+    automationAccountConnection
+    storageAccount
+    resourceGroups
+  ]
+}
+
 module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = {
   name: 'rbac-AAConnector-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, ResourceGroups[0])
@@ -279,7 +300,9 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
   name: 'getImageVersionlogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, ResourceGroups[1])
   params: {
+    officeConnectionName: officeConnectionName
     subscriptionId: subscriptionId
+    emailContact: emailContact
     workflows_GetImageVersion_name: workflows_GetImageVersion_name
     automationAccountConnectionName: automationAccountConnectionName
     location: location
@@ -304,6 +327,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     automationAccount
     automationAccountConnection
     blobConnection
+    o365Connection
     storageAccount
     resourceGroups
   ]

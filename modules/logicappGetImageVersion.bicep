@@ -18,6 +18,8 @@ param falseExpression bool
 param trueExpression bool
 param hostPoolName string
 param identityType string
+param emailContact string
+param officeConnectionName string
 
 
 resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
@@ -83,63 +85,89 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
             }
           }
         }
-        Condition: {
-          actions: {
-            Create_rip_and_replace_job: {
-              runAfter: {
-              }
-              type: 'ApiConnection'
-              inputs: {
-                host: {
-                  connection: {
-                    name: '@parameters(\'$connections\')[\'azureautomation\'][\'connectionId\']'
-                  }
-                }
-                method: 'put'
-                path: concat('/subscriptions/@{encodeURIComponent(\'${subscriptionId}\')}/resourceGroups/@{encodeURIComponent(\'${automationAccountResourceGroup}\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'${automationAccountName}\')}/jobs')
-                queries: {
-                  runbookName: runbookNewHostPoolRipAndReplace
-                  wait: waitForRunBook
-                  'x-ms-api-version': '2015-10-31'
-                }
-              }
-            }
-          }
-          runAfter: {
-            Parse_image_version: [
-              'Succeeded'
-            ]
-          }
-          else: {
+          Condition: {
             actions: {
-              Terminate: {
+              Condition_2: {
+                actions: {
+                }
+                runAfter: {
+                  Send_approval_email: [
+                    'Succeeded'
+                  ]
+                }
+                expression: {
+                  and: [
+                    {
+                      equals: [
+                        '@body(\'Send_approval_email\')?[\'SelectedOption\']'
+                        'Approve'
+                      ]
+                    }
+                  ]
+                }
+                type: 'If'
+              }
+              Send_approval_email: {
                 runAfter: {
                 }
-                type: 'Terminate'
+                type: 'ApiConnectionWebhook'
                 inputs: {
-                  runStatus: 'Cancelled'
+                  body: {
+                    Message: {
+                      Body: 'Virtual Machine: @{body(\'Parse_Session_Host_VM_and_RG\')?[\'productionVM\']}\n\n\nNew Image Status:  @{body(\'Parse_image_version\')?[\'NewImageFound\']}\n\n\nPlease approve schedule for "Rip and Replace" of AVD enviroment. \n'
+                      HideHTMLMessage: false
+                      Importance: 'High'
+                      Options: 'Approve, Reject'
+                      ShowHTMLConfirmationDialog: true
+                      Subject: 'Approval Request - Updating AVD Environment'
+                      To: emailContact
+                    }
+                    NotificationUrl: '@{listCallbackUrl()}'
+                  }
+                  host: {
+                    connection: {
+                      name: '@parameters(\'$connections\')[\'office365\'][\'connectionId\']'
+                    }
+                  }
+                  path: '/approvalmail/$subscriptions'
                 }
               }
             }
-          }
-          expression: {
-            and: [
-              {
-                equals: [
-                  '@body(\'Parse_Schedule\')?[\'ScheduleFound\']'
-                  falseExpression
-                ]
+            runAfter: {
+              Parse_image_version: [
+                'Succeeded'
+              ]
+            }
+            else: {
+              actions: {
+                Terminate: {
+                  runAfter: {
+                  }
+                  type: 'Terminate'
+                  inputs: {
+                    runStatus: 'Cancelled'
+                  }
+                }
               }
-              {
-                equals: [
-                  '@body(\'Parse_image_version\')?[\'NewImageFound\']'
-                  trueExpression
-                ]
-              }
-            ]
+            }
+            expression: {
+              and: [
+                {
+                  equals: [
+                    '@body(\'Parse_Schedule\')?[\'ScheduleFound\']'
+                    false
+                  ]
+                }
+                {
+                  equals: [
+                    '@body(\'Parse_image_version\')?[\'NewImageFound\']'
+                    true
+                  ]
+                }
+              ]
+            }
+            type: 'If'
           }
-          type: 'If'
-        }
         Get_Session_Host_VM: {
           runAfter: {
           }
@@ -333,10 +361,14 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
           }
             id: concat('/subscriptions/${subscriptionId}/providers/Microsoft.Web/locations/${automationAccountLocation}/managedApis/azureautomation')
           }
+          office365: {
+            connectionId: '/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Web/connections/${officeConnectionName}'
+            connectionName: officeConnectionName
+            id: '/subscriptions/${subscriptionId}/providers/Microsoft.Web/locations/${automationAccountLocation}/managedApis/office365'
+          }
         }
       }
     }
   }
 }
-
 output imagePrincipalId string = workflows_GetImageVersion_name_resource.identity.principalId
