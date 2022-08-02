@@ -6,7 +6,6 @@ param (
     [parameter(mandatory = $true)]$RunbookName,
     [parameter(mandatory = $true)]$ScheduleName,
 	[parameter(mandatory = $true)]$Environment
-
 )
 
 # Connect using a Managed Service Identity
