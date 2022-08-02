@@ -1,6 +1,6 @@
 targetScope = 'subscription'
 
-param location string = 'usgovvirginia'
+param location string = deployment().location
 
 @allowed([
   'AzureUSGovernment'
@@ -61,8 +61,6 @@ param startTime string = '23:00'
 var subscriptionId = subscription().subscriptionId
 var recurrenceType = 'Recurrence'
 var waitForRunBook = true
-var falseExpression = false
-var trueExpression = true
 var officeConnectionName =  'office365'
 var automationAccountConnectionName = 'azureautomation'
 var blobConnectionName = 'azureblob'
@@ -197,10 +195,6 @@ module automationAccount 'modules/automationAccount.bicep' = {
     automationAccountName: automationAccountName
     location: location
     runbookNames: runbooks
-    // scheduleName: 'Test'
-    // startTime: '23:00'
-    // scheduleRunbookName:'AVDRipAndReplaceSchedule'
-    // cloud:cloud
   }
   dependsOn: [
     resourceGroups
@@ -354,8 +348,6 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     getRunbookGetSessionHostVm: runbookGetSessionHostVm
     getGetMarketPlaceImageVersion: runbookMarketPlaceImageVersion
     waitForRunBook: waitForRunBook
-    falseExpression: falseExpression
-    trueExpression: trueExpression
     hostPoolName: hostPoolName
     identityType: identityType
   }
