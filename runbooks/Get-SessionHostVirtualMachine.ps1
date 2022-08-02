@@ -1,15 +1,16 @@
 [CmdletBinding()]
 param (
-
-    [parameter(mandatory = $true)]$hostpoolName
+    [parameter(mandatory = $true)]$HostpoolName
 )
 
 
 # Connect using a Managed Service Identity
-try {
+try
+{
     $AzureContext = (Connect-AzAccount -Identity -Environment AzureUSGovernment).context
 }
-catch{
+catch
+{
     Write-Output "There is no system-assigned user identity. Aborting.";
     exit
 }
