@@ -46,6 +46,8 @@ param triggerInterval int = 1
 // Exisiting AVD resource group
 param hostPoolResourceGroupName string = 'rg-sharedservices-til-001'
 
+param sessionHostResourceGroupName string = 'rg-sharedservices-til-001'
+
 // UTC
 param deploymentNameSuffix string  = utcNow()
 
@@ -287,6 +289,24 @@ module rbacBlobPermissionConnector 'modules/rbacPermissions.bicep' = {
 module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
   name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
   scope:resourceGroup(subscriptionId, hostPoolResourceGroupName)
+  params: {
+    principalId: automationAccount.outputs.aaIdentityId
+    roleId: roleId
+  }
+  dependsOn: [
+    automationAccount
+    automationAccountConnection
+    blobConnection
+    getBlobUpdateLogicApp
+    getImageVersionlogicApp
+    storageAccount
+    resourceGroups
+  ]
+}
+
+module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
+  name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
+  scope:resourceGroup(subscriptionId, sessionHostResourceGroupName)
   params: {
     principalId: automationAccount.outputs.aaIdentityId
     roleId: roleId

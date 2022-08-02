@@ -2,8 +2,7 @@
 [CmdletBinding()]
 param (
     [parameter(mandatory = $true)]$VmName,
-	[parameter(mandatory = $true)]$ResourceGroupName,
-    [parameter(mandatory = $true)]$Cloud
+	[parameter(mandatory = $true)]$ResourceGroupName
 )
 
 # Connect using a Managed Service Identity
