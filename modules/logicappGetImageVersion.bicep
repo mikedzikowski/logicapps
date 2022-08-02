@@ -14,13 +14,12 @@ param getRunbookScheduleRunbookName string
 param getRunbookGetSessionHostVm string
 param getGetMarketPlaceImageVersion string
 param waitForRunBook bool
-param falseExpression bool
-param trueExpression bool
 param hostPoolName string
 param identityType string
 param emailContact string
 param officeConnectionName string
-
+param cloud string
+param startTime string
 
 resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetImageVersion_name
@@ -54,7 +53,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
         }
       }
       actions: {
-        Check_for_existing_Schedule: {
+        Check_for_Existing_Schedule: {
           runAfter: {
             Parse_Session_Host_VM_and_RG: [
               'Succeeded'
@@ -85,15 +84,58 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
             }
           }
         }
-          Condition: {
+          Schedule_and_NewImage_Condition: {
             actions: {
-              Condition_2: {
+              Approval_Condition: {
                 actions: {
+                  Create_schedule_for_host_pool_rip_and_replace: {
+                    runAfter: {
+                    }
+                    type: 'ApiConnection'
+                    inputs: {
+                      body: {
+                        properties: {
+                          parameters: {
+                            AutomationAccountName: automationAccountName
+                            ResourceGroupName: automationAccountResourceGroup
+                            ScheduleName: 'NewScheduelRipAndReplace'
+                            StartTime: startTime
+                            environment: cloud
+                            runbookName: runbookNewHostPoolRipAndReplace
+                          }
+                        }
+                      }
+                      host: {
+                        connection: {
+                          name: '@parameters(\'$connections\')[\'azureautomation\'][\'connectionId\']'
+                        }
+                      }
+                      method: 'put'
+                      path: '/subscriptions/@{encodeURIComponent(\'${subscriptionId}\')}/resourceGroups/@{encodeURIComponent(\'${automationAccountResourceGroup}\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'${automationAccountName}\')}/jobs'
+                      queries: {
+                        runbookName: 'New-AutomationSchedule'
+                        wait: true
+                        'x-ms-api-version': '2015-10-31'
+                      }
+                    }
+                  }
                 }
                 runAfter: {
                   Send_approval_email: [
                     'Succeeded'
                   ]
+                }
+                else: {
+                  actions: {
+                    Terminate_2: {
+                      runAfter: {
+                      }
+                      type: 'Terminate'
+                      inputs: {
+                        runStatus: 'Cancelled'
+                      }
+                    }
+                  }
                 }
                 expression: {
                   and: [
@@ -115,11 +157,11 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                   body: {
                     Message: {
                       Body: 'Virtual Machine: @{body(\'Parse_Session_Host_VM_and_RG\')?[\'productionVM\']}\n\n\nNew Image Status:  @{body(\'Parse_image_version\')?[\'NewImageFound\']}\n\n\nPlease approve schedule for "Rip and Replace" of AVD enviroment. \n'
-                      HideHTMLMessage: false
+                      HideHTMLMessage: true
                       Importance: 'High'
                       Options: 'Approve, Reject'
-                      ShowHTMLConfirmationDialog: true
-                      Subject: 'Approval Request - Updating AVD Environment'
+                      ShowHTMLConfirmationDialog: false
+                      Subject: 'Approval Requested - New Image Found for AVD Environment. Please Approve or Reject Creating Automated Schedule for Updating AVD Environment'
                       To: emailContact
                     }
                     NotificationUrl: '@{listCallbackUrl()}'
@@ -194,7 +236,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
             }
           }
         }
-        Get_job_output: {
+        Get_Job_Output: {
           runAfter: {
             Get_Session_Host_VM: [
               'Succeeded'
@@ -214,9 +256,9 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
             }
           }
         }
-        Get_job_output_of_marketplace_image_version: {
+        Get_Job_Output_of_Marketplace_Image_Version: {
           runAfter: {
-            Get_marketplace_image_version: [
+            Get_Marketplace_Image_Version: [
               'Succeeded'
             ]
           }
@@ -228,13 +270,13 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
               }
             }
             method: 'get'
-            path: concat('/subscriptions/@{encodeURIComponent(\'${subscriptionId}\')}/resourceGroups/@{encodeURIComponent(\'${automationAccountResourceGroup}\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'${automationAccountName}\')}/jobs/@{encodeURIComponent(body(\'Get_marketplace_image_version\')?[\'properties\']?[\'jobId\'])}/output')
+            path: concat('/subscriptions/@{encodeURIComponent(\'${subscriptionId}\')}/resourceGroups/@{encodeURIComponent(\'${automationAccountResourceGroup}\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'${automationAccountName}\')}/jobs/@{encodeURIComponent(body(\'Get_Marketplace_Image_Version\')?[\'properties\']?[\'jobId\'])}/output')
             queries: {
               'x-ms-api-version': '2015-10-31'
             }
           }
         }
-        Get_marketplace_image_version: {
+        Get_Marketplace_Image_Version: {
           runAfter: {
             Parse_Schedule: [
               'Succeeded'
@@ -264,9 +306,9 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
             }
           }
         }
-        'Get_output_from_runbook_Get-RunBookSchedule': {
+        'Get_Output_from_Runbook_Get-RunBookSchedule': {
           runAfter: {
-            Check_for_existing_Schedule: [
+            Check_for_Existing_Schedule: [
               'Succeeded'
             ]
           }
@@ -278,7 +320,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
               }
             }
             method: 'get'
-            path: concat('/subscriptions/@{encodeURIComponent(\'${subscriptionId}\')}/resourceGroups/@{encodeURIComponent(\'${automationAccountResourceGroup}\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'${automationAccountName}\')}/jobs/@{encodeURIComponent(body(\'Check_for_existing_Schedule\')?[\'properties\']?[\'jobId\'])}/output')
+            path: concat('/subscriptions/@{encodeURIComponent(\'${subscriptionId}\')}/resourceGroups/@{encodeURIComponent(\'${automationAccountResourceGroup}\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'${automationAccountName}\')}/jobs/@{encodeURIComponent(body(\'Check_for_Existing_Schedule\')?[\'properties\']?[\'jobId\'])}/output')
             queries: {
               'x-ms-api-version': '2015-10-31'
             }
@@ -286,13 +328,13 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
         }
         Parse_Schedule: {
           runAfter: {
-            'Get_output_from_runbook_Get-RunBookSchedule': [
+            'Get_Output_from_Runbook_Get-RunBookSchedule': [
               'Succeeded'
             ]
           }
           type: 'ParseJson'
           inputs: {
-            content: '@body(\'Get_output_from_runbook_Get-RunBookSchedule\')'
+            content: '@body(\'Get_Output_from_Runbook_Get-RunBookSchedule\')'
             schema: {
               properties: {
                 ScheduleFound: {
@@ -305,7 +347,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
         }
         Parse_Session_Host_VM_and_RG: {
           runAfter: {
-            Get_job_output: [
+            Get_Job_Output: [
               'Succeeded'
             ]
           }
@@ -327,13 +369,13 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
         }
         Parse_image_version: {
           runAfter: {
-            Get_job_output_of_marketplace_image_version: [
+            Get_Job_Output_of_Marketplace_Image_Version: [
               'Succeeded'
             ]
           }
           type: 'ParseJson'
           inputs: {
-            content: '@body(\'Get_job_output_of_marketplace_image_version\')'
+            content: '@body(\'Get_Job_Output_of_Marketplace_Image_Version\')'
             schema: {
               properties: {
                 NewImageFound: {

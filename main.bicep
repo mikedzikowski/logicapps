@@ -2,6 +2,12 @@ targetScope = 'subscription'
 
 param location string = 'usgovvirginia'
 
+@allowed([
+  'AzureUSGovernment'
+  'AzureCloud'
+])
+param cloud string = 'AzureUSGovernment'
+
 // Environment
 @allowed([
   'production'
@@ -49,6 +55,8 @@ param hostPoolResourceGroupName string = 'rg-sharedservices-til-001'
 // UTC
 param deploymentNameSuffix string  = utcNow()
 
+param startTime string = '23:00'
+
 // Variables
 var subscriptionId = subscription().subscriptionId
 var recurrenceType = 'Recurrence'
@@ -86,6 +94,10 @@ var runbooks = [
   {
     name: 'New-HostPoolRipAndReplace'
     uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/New-HostPoolRipAndReplace.ps1'
+  }
+  {
+    name: 'New-AutomationSchedule'
+    uri: 'https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/New-AutomationSchedule.ps1'
   }
 ]
 
@@ -185,6 +197,10 @@ module automationAccount 'modules/automationAccount.bicep' = {
     automationAccountName: automationAccountName
     location: location
     runbookNames: runbooks
+    // scheduleName: 'Test'
+    // startTime: '23:00'
+    // scheduleRunbookName:'AVDRipAndReplaceSchedule'
+    // cloud:cloud
   }
   dependsOn: [
     resourceGroups
@@ -243,7 +259,7 @@ module o365Connection 'modules/officeConnection.bicep' = {
 }
 
 module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = {
-  name: 'rbac-AAConnector-deployment-${deploymentNameSuffix}'
+  name: 'rbac-aaConnector-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, ResourceGroups[0])
   params: {
     principalId: getImageVersionlogicApp.outputs.imagePrincipalId
@@ -296,10 +312,30 @@ module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
   ]
 }
 
+module rbacPermissionAzureAutomationAccountRg 'modules/rbacPermissions.bicep' = {
+  name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
+  scope:resourceGroup(subscriptionId, ResourceGroups[0])
+  params: {
+    principalId: automationAccount.outputs.aaIdentityId
+    roleId: roleId
+  }
+  dependsOn: [
+    automationAccount
+    automationAccountConnection
+    blobConnection
+    getBlobUpdateLogicApp
+    getImageVersionlogicApp
+    storageAccount
+    resourceGroups
+  ]
+}
+
 module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
   name: 'getImageVersionlogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, ResourceGroups[1])
   params: {
+    startTime: startTime
+    cloud: cloud
     officeConnectionName: officeConnectionName
     subscriptionId: subscriptionId
     emailContact: emailContact

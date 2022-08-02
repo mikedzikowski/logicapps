@@ -1,26 +1,25 @@
 
 [CmdletBinding()]
 param (
-
-    [parameter(mandatory = $true)]$automationAccountName,
-	[parameter(mandatory = $true)]$resourceGroupName,
-	[parameter(mandatory = $true)]$runbookName
+    [parameter(mandatory = $true)]$AutomationAccountName,
+	[parameter(mandatory = $true)]$ResourceGroupName,
+	[parameter(mandatory = $true)]$RunbookName
 )
 
-
 # Connect using a Managed Service Identity
-try {
+try
+{
     $AzureContext = (Connect-AzAccount -Identity -Environment AzureUSGovernment).context
 }
-catch{
+catch
+{
     Write-Output "There is no system-assigned user identity. Aborting.";
     exit
 }
 
 $AzureContext = Set-AzContext -SubscriptionName $AzureContext.Subscription -DefaultProfile $AzureContext
 
-$schedule  = Get-AzAutomationScheduledRunbook -AutomationAccountName $automationAccountName -ResourceGroupName $resourceGroupName -RunbookName $runbookName
-
+$schedule  = Get-AzAutomationScheduledRunbook -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -RunbookName $RunbookName
 
 if ($schedule)
 {
@@ -37,4 +36,3 @@ $objOut = [PSCustomObject]@{
 }
 
 Write-Output ( $objOut | ConvertTo-Json)
-

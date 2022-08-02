@@ -1,6 +1,34 @@
 param location string
 param automationAccountName string
 param runbookNames array
+// param startTime string
+// param scheduleRunbookName string
+// param scheduleName string
+// param cloud string
+
+// var automationAccountVariables = [
+//   {
+//   name: 'AutomationAccountName'
+//   value: automationAccountName
+//   }
+//   {
+//   name: 'StartTime'
+//   value: startTime
+//   }
+//   {
+//   name: 'RunbookName'
+//   value: scheduleRunbookName
+//   }
+//   {
+//   name: 'ScheduleName'
+//   value: scheduleName
+//   }
+//   {
+//     name: 'Environment'
+//     value: cloud
+//   }
+// ]
+
 
 resource automationAccount 'Microsoft.Automation/automationAccounts@2021-06-22' = {
   name: automationAccountName
