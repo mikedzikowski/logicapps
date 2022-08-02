@@ -286,7 +286,7 @@ module rbacBlobPermissionConnector 'modules/rbacPermissions.bicep' = {
   ]
 }
 
-module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
+module rbacHostPoolPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
   name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
   scope:resourceGroup(subscriptionId, hostPoolResourceGroupName)
   params: {
@@ -304,7 +304,7 @@ module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
   ]
 }
 
-module rbacPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
+module rbacSessionHostPermissionAzureAutomationAccount 'modules/rbacPermissions.bicep' = {
   name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
   scope:resourceGroup(subscriptionId, sessionHostResourceGroupName)
   params: {
