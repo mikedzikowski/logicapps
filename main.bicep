@@ -4,11 +4,11 @@ param location string = deployment().location
 
 // Environment
 @allowed([
-  'production'
-  'development'
-  'staging'
+  'p'
+  'd'
+  's'
 ])
-param Environment string = 'staging'
+param Environment string = 's'
 
 // GetImageVersion Logic App Parameters
 param workflows_GetImageVersion_name string = 'GetImageVersionLogicApp'
