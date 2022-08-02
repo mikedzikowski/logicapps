@@ -219,6 +219,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
               properties: {
                 parameters: {
                   hostpoolName: hostPoolName
+                  Environment: cloud
                 }
               }
             }

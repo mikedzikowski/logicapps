@@ -2,12 +2,6 @@ targetScope = 'subscription'
 
 param location string = deployment().location
 
-@allowed([
-  'AzureUSGovernment'
-  'AzureCloud'
-])
-param cloud string = 'AzureUSGovernment'
-
 // Environment
 @allowed([
   'production'
@@ -167,6 +161,8 @@ var storageAccountName = replace('sa${NamingStandard}','-','')
 
 // Automation Account Parameters
 var automationAccountName = 'aa-${NamingStandard}'
+
+var cloud = environment().name
 
 // Resource Groups needed for the solution
 resource resourceGroups 'Microsoft.Resources/resourceGroups@2020-10-01' = [for i in range(0, length(ResourceGroups)): {
