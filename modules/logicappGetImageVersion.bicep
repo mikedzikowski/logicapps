@@ -20,6 +20,7 @@ param emailContact string
 param officeConnectionName string
 param cloud string
 param startTime string
+param dayOfWeek string
 
 resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetImageVersion_name
@@ -100,6 +101,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                             ResourceGroupName: automationAccountResourceGroup
                             ScheduleName: 'NewScheduelRipAndReplace'
                             StartTime: startTime
+                            DayOfWeek: dayOfWeek
                             environment: cloud
                             runbookName: runbookNewHostPoolRipAndReplace
                           }
@@ -161,7 +163,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                       Importance: 'High'
                       Options: 'Approve, Reject'
                       ShowHTMLConfirmationDialog: false
-                      Subject: 'Approval Requested - New Image Found for AVD Environment. Please Approve or Reject Creating Automated Schedule for Updating AVD Environment'
+                      Subject: 'New Image Found for AVD Environment - @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPoolName\']}. Please Approve or Reject Creating Automated Schedule for Updating AVD Environment'
                       To: emailContact
                     }
                     NotificationUrl: '@{listCallbackUrl()}'
@@ -357,6 +359,9 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
             content: '@body(\'Get_job_output\')'
             schema: {
               properties: {
+                hostPoolName: {
+                  type: 'string'
+                }
                 productionVM: {
                   type: 'string'
                 }

@@ -38,7 +38,7 @@ $productionVirtualMachine = Get-AzVM -Name $existingSessionHost
 $objOut = [PSCustomObject]@{
     productionVm = $productionVirtualMachine.Name
 	productionVmRg = $productionVirtualMachine.ResourceGroupName
-    hostPoolName = $hostPoolName
+    hostPool = $hostPoolName
 }
 
 Write-Output ( $objOut | ConvertTo-Json)

@@ -51,6 +51,18 @@ param sessionHostResourceGroupName string = 'rg-sharedservices-til-001'
 // UTC
 param deploymentNameSuffix string  = utcNow()
 
+// Maintence Window
+@allowed([
+  'Monday'
+  'Tuesday'
+  'Wednesday'
+  'Thursday'
+  'Friday'
+  'Saturday'
+  'Sunday'
+])
+param dayOfWeek string = 'Saturday'
+
 param startTime string = '23:00'
 
 // Variables
@@ -344,6 +356,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
   name: 'getImageVersionlogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, ResourceGroups[1])
   params: {
+    dayOfWeek: dayOfWeek
     startTime: startTime
     cloud: cloud
     officeConnectionName: officeConnectionName
