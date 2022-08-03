@@ -21,6 +21,7 @@ param officeConnectionName string
 param cloud string
 param startTime string
 param dayOfWeek string
+param dayOfWeekOccurrence string
 
 resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetImageVersion_name
@@ -68,6 +69,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                   AutomationAccountName: automationAccountName
                   ResourceGroupName: automationAccountResourceGroup
                   runbookName: runbookNewHostPoolRipAndReplace
+                  Environment: cloud
                 }
               }
             }
@@ -85,7 +87,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
             }
           }
         }
-          Schedule_and_NewImage_Condition: {
+          Schedule_and_New_Image_Condition: {
             actions: {
               Approval_Condition: {
                 actions: {
@@ -102,6 +104,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                             ScheduleName: 'NewScheduelRipAndReplace'
                             StartTime: startTime
                             DayOfWeek: dayOfWeek
+                            DayOfWeekOccurrence: dayOfWeekOccurrence
                             environment: cloud
                             runbookName: runbookNewHostPoolRipAndReplace
                           }
@@ -158,12 +161,12 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                 inputs: {
                   body: {
                     Message: {
-                      Body: 'Virtual Machine: @{body(\'Parse_Session_Host_VM_and_RG\')?[\'productionVM\']}\n\n\nNew Image Status:  @{body(\'Parse_image_version\')?[\'NewImageFound\']}\n\n\nPlease approve schedule for "Rip and Replace" of AVD enviroment. \n'
+                      Body: 'Hostpool: @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']}\n\n\nNew Image Status:  @{body(\'Parse_image_version\')?[\'NewImageFound\']}\n\n\nPlease approve schedule on the ${dayOfWeekOccurrence} ${dayOfWeek} of the Month @ ${startTime} for "rip and replace" of @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']} AVD enviroment. \n'
                       HideHTMLMessage: true
                       Importance: 'High'
                       Options: 'Approve, Reject'
                       ShowHTMLConfirmationDialog: false
-                      Subject: 'New Image Found for AVD Environment - @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPoolName\']}. Please Approve or Reject Creating Automated Schedule for Updating AVD Environment'
+                      Subject: 'New Image Found for AVD Hostpool Environment - @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']}. Please Approve or Reject Creating Automated Schedule for Updating AVD Environment'
                       To: emailContact
                     }
                     NotificationUrl: '@{listCallbackUrl()}'
@@ -292,6 +295,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                 parameters: {
                   ResourceGroupName: '@body(\'Parse_Session_Host_VM_and_RG\')?[\'productionVmRg\']'
                   VMName: '@body(\'Parse_Session_Host_VM_and_RG\')?[\'productionVm\']'
+                  Environment: cloud
                 }
               }
             }
@@ -359,7 +363,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
             content: '@body(\'Get_job_output\')'
             schema: {
               properties: {
-                hostPoolName: {
+                hostPool: {
                   type: 'string'
                 }
                 productionVM: {

@@ -63,6 +63,15 @@ param deploymentNameSuffix string  = utcNow()
 ])
 param dayOfWeek string = 'Saturday'
 
+@allowed([
+  'First'
+  'Second'
+  'Third'
+  'Fourth'
+  'LastDay'
+])
+param dayOfWeekOccurrence string = 'Second'
+
 param startTime string = '23:00'
 
 // Variables
@@ -358,6 +367,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
   params: {
     dayOfWeek: dayOfWeek
     startTime: startTime
+    dayOfWeekOccurrence: dayOfWeekOccurrence
     cloud: cloud
     officeConnectionName: officeConnectionName
     subscriptionId: subscriptionId

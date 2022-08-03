@@ -3,13 +3,14 @@
 param (
     [parameter(mandatory = $true)]$AutomationAccountName,
 	[parameter(mandatory = $true)]$ResourceGroupName,
-	[parameter(mandatory = $true)]$RunbookName
+	[parameter(mandatory = $true)]$RunbookName,
+    [parameter(mandatory = $true)]$Environment
 )
 
 # Connect using a Managed Service Identity
 try
 {
-    $AzureContext = (Connect-AzAccount -Identity -Environment AzureUSGovernment).context
+    $AzureContext = (Connect-AzAccount -Identity -Environment $Environment).context
 }
 catch
 {
