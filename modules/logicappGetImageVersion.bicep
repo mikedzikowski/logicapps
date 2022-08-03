@@ -70,7 +70,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                   ResourceGroupName: automationAccountResourceGroup
                   runbookName: runbookNewHostPoolRipAndReplace
                   Environment: cloud
-                  Hostpool: hostPoolName
+                  HostpoolName: hostPoolName
                 }
               }
             }

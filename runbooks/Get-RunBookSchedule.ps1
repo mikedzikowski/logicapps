@@ -21,7 +21,7 @@ catch
 
 $AzureContext = Set-AzContext -SubscriptionName $AzureContext.Subscription -DefaultProfile $AzureContext
 
-$schedule  = Get-AzAutomationScheduledRunbook -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -RunbookName $RunbookName | Where-Object {$_.ScheduleName -like "*$hostpoolName*"}
+$schedule  = Get-AzAutomationScheduledRunbook -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -RunbookName $RunbookName | Where-Object {$_.ScheduleName -like "*$HostpoolName*"}
 
 if ($schedule)
 {
