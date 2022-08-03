@@ -1,10 +1,11 @@
 [CmdletBinding()]
 param (
     [parameter(mandatory = $true)]$AutomationAccountName,
-    [parameter(mandatory = $true)]$StartTime,
     [parameter(mandatory = $true)]$ResourceGroupName,
     [parameter(mandatory = $true)]$RunbookName,
     [parameter(mandatory = $true)]$ScheduleName,
+    [parameter(mandatory = $true)]$StartTime,
+    [parameter(mandatory = $true)]$DayOfWeek,
 	[parameter(mandatory = $true)]$Environment
 )
 
@@ -23,7 +24,7 @@ $AzureContext = Set-AzContext -SubscriptionName $AzureContext.Subscription -Defa
 
 # Create Automation Schedule
 $TimeZone = ([System.TimeZoneInfo]::Local).Id
-New-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $ScheduleName -StartTime $StartTime -ResourceGroupName $ResourceGroupName -TimeZone $TimeZone -OneTime
+New-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $ScheduleName -DayOfWeek $DayOfWeek -StartTime $StartTime -ResourceGroupName $ResourceGroupName -TimeZone $TimeZone -OneTime
 
 Start-Sleep 10
 
