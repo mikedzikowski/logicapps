@@ -6,10 +6,11 @@ param (
 	[parameter(mandatory = $true)]$Environment,
     [parameter(mandatory = $true)]$ScheduleName,
     [parameter(mandatory = $true)]$DayOfWeek,
+    [parameter(mandatory = $true)]$DayOfWeekOccurrence,
     [parameter(mandatory = $true)]$StartTime
 )
 
-# Connect using a Managed Service Identity
+Connect using a Managed Service Identity
 try
 {
     $AzureContext = (Connect-AzAccount -Identity -Environment $Environment).context
@@ -23,8 +24,7 @@ catch
 $AzureContext = Set-AzContext -SubscriptionName $AzureContext.Subscription -DefaultProfile $AzureContext
 
 # Create Automation Schedule
-$TimeZone = ([System.TimeZoneInfo]::Local).Id
-New-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $ScheduleName -DayOfWeek $DayOfWeek -StartTime $StartTime -ResourceGroupName $ResourceGroupName -TimeZone $TimeZone -OneTime
+New-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $ScheduleName -StartTime $StartTime -ResourceGroupName $ResourceGroupName -TimeZone $TimeZone -DayOfWeek $DayOfWeek -DayOfWeekOccurrence $DayOfWeekOccurrence -MonthInterval 1
 
 Start-Sleep 10
 
