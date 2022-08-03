@@ -4,6 +4,7 @@ param (
     [parameter(mandatory = $true)]$AutomationAccountName,
 	[parameter(mandatory = $true)]$ResourceGroupName,
 	[parameter(mandatory = $true)]$RunbookName,
+    [parameter(mandatory = $true)]$HostpoolName,
     [parameter(mandatory = $true)]$Environment
 )
 
@@ -20,7 +21,7 @@ catch
 
 $AzureContext = Set-AzContext -SubscriptionName $AzureContext.Subscription -DefaultProfile $AzureContext
 
-$schedule  = Get-AzAutomationScheduledRunbook -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -RunbookName $RunbookName
+$schedule  = Get-AzAutomationScheduledRunbook -AutomationAccountName $AutomationAccountName -ResourceGroupName $ResourceGroupName -RunbookName $RunbookName | Where-Object {$_.ScheduleName -like "*$hostpoolName*"}
 
 if ($schedule)
 {

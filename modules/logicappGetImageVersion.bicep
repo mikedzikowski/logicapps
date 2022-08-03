@@ -70,6 +70,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                   ResourceGroupName: automationAccountResourceGroup
                   runbookName: runbookNewHostPoolRipAndReplace
                   Environment: cloud
+                  Hostpool: hostPoolName
                 }
               }
             }
@@ -101,7 +102,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                           parameters: {
                             AutomationAccountName: automationAccountName
                             ResourceGroupName: automationAccountResourceGroup
-                            ScheduleName: 'NewScheduelRipAndReplace'
+                            ScheduleName: '${hostPoolName}-ScheduleForRipAndReplace'
                             StartTime: startTime
                             DayOfWeek: dayOfWeek
                             DayOfWeekOccurrence: dayOfWeekOccurrence
