@@ -3,10 +3,10 @@ param (
     [parameter(mandatory = $true)]$AutomationAccountName,
     [parameter(mandatory = $true)]$ResourceGroupName,
     [parameter(mandatory = $true)]$RunbookName,
+	[parameter(mandatory = $true)]$Environment,
     [parameter(mandatory = $true)]$ScheduleName,
-    [parameter(mandatory = $true)]$StartTime,
     [parameter(mandatory = $true)]$DayOfWeek,
-	[parameter(mandatory = $true)]$Environment
+    [parameter(mandatory = $true)]$StartTime
 )
 
 # Connect using a Managed Service Identity
