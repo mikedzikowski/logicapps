@@ -10,9 +10,6 @@ param location string = deployment().location
 ])
 param Environment string = 's'
 
-// GetImageVersion Logic App Parameters
-param workflows_GetImageVersion_name string = 'GetImageVersionLogicApp'
-
 @allowed([
   'Month'
   'Week'
@@ -28,7 +25,6 @@ param recurrenceInterval int = 1
 param emailContact string = 'micdz@microsoft.com'
 
 // Get BlobUpdate Logic App Parameters
-param workflows_GetBlobUpdate_name string = 'GetBlobUpdateLogicApp'
 param container string = 'container'
 param hostPoolName string = 'ProdMirror'
 
@@ -75,6 +71,9 @@ param dayOfWeekOccurrence string = 'Second'
 param startTime string = '23:00'
 
 // Variables
+// GetImageVersion Logic App Parameters
+var workflows_GetImageVersion_name = '${hostPoolName}-CheckImageVersion-la'
+var workflows_GetBlobUpdate_name = '${hostPoolName}-CheckForBlobUpdate-la'
 var subscriptionId = subscription().subscriptionId
 var recurrenceType = 'Recurrence'
 var waitForRunBook = true

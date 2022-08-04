@@ -1,1 +1,6 @@
-Write-Verbose "hello world"
+[CmdletBinding()]
+param (
+    [parameter(mandatory = $true)]$HostpoolName
+)
+
+Write-Verbose $HostpoolName
