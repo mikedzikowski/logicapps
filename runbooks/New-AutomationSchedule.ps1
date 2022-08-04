@@ -25,7 +25,7 @@ catch
 $AzureContext = Set-AzContext -SubscriptionName $AzureContext.Subscription -DefaultProfile $AzureContext
 
 # Create Automation Schedule
-New-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $ScheduleName -StartTime $StartTime -ResourceGroupName $ResourceGroupName -TimeZone $TimeZone -DayOfWeek $DayOfWeek -DayOfWeekOccurrence $DayOfWeekOccurrence -MonthInterval 1 -
+New-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $ScheduleName -StartTime $StartTime -ResourceGroupName $ResourceGroupName -TimeZone $TimeZone -DayOfWeek $DayOfWeek -DayOfWeekOccurrence $DayOfWeekOccurrence -MonthInterval 1
 
 Start-Sleep 10
 
