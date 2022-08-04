@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Environment": {
+            "value": "d"
+        },
+        "recurrenceFrequency": {
+            "value": "Day"
+        },
+        "recurrenceInterval": {
+            "value": 1
+        },
+        "emailContact": {
+            "value": "micdz@microsoft.com"
+        },
+        "container": {
+            "value": "container"
+        },
+        "hostPoolName": {
+            "value": "ProdMirror"
+        },
+        "triggerFrequency": {
+            "value": "Day"
+        },
+        "triggerInterval": {
+            "value": 1
+        },
+        "hostPoolResourceGroupName": {
+            "value": "rg-sharedservices-til-001"
+        },
+        "sessionHostResourceGroupName": {
+            "value": "rg-sharedservices-til-001"
+        },
+        "deploymentNameSuffix": {
+            "value": "" // TODO: Fill in parameter value
+        },
+        "dayOfWeek": {
+            "value": "Saturday"
+        },
+        "dayOfWeekOccurrence": {
+            "value": "Second"
+        },
+        "startTime": {
+            "value": "23:00"
+        }
+    }
+}
