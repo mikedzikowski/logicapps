@@ -4,9 +4,9 @@ param location string = deployment().location
 
 // Environment
 @allowed([
-  'p'
-  'd'
-  's'
+  'p' // Production
+  'd' // Development
+  's' // Staging
 ])
 param Environment string = 's'
 
