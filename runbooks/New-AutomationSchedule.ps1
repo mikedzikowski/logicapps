@@ -8,7 +8,10 @@ param (
     [parameter(mandatory = $true)]$DayOfWeek,
     [parameter(mandatory = $true)]$DayOfWeekOccurrence,
     [parameter(mandatory = $true)]$StartTime,
-    [parameter(mandatory = $true)]$HostPoolName
+    [parameter(mandatory = $true)]$HostPoolName,
+    [parameter(mandatory = $true)]$TenantId,
+    [parameter(mandatory = $true)]$SubscriptionId,
+    [parameter(mandatory = $true)]$TemplateSpecId
 )
 
 Connect using a Managed Service Identity
@@ -29,6 +32,12 @@ New-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $Sc
 
 Start-Sleep 10
 
-$params = @{"HostPoolName" = $HostPoolName;}
+$params = @{
+"Environment"    = $Environment;
+"HostPoolName"   = $HostPoolName;
+"TenantId"       = $TenantId;
+"SubscriptionId" = $SubscriptionId;
+"TemplateSpecId" = $TemplateSpecId
+}
 # Register Automation Schedule to Runbook
 Register-AzAutomationScheduledRunbook -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -RunbookName $RunbookName -ScheduleName $ScheduleName -Parameters $params
