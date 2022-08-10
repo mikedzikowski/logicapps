@@ -5,13 +5,17 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "17133937724703174013"
+      "templateHash": "7868992321812348874"
     }
   },
   "parameters": {
     "location": {
       "type": "string",
       "defaultValue": "[deployment().location]"
+    },
+    "templateSpecId": {
+      "type": "string",
+      "defaultValue": ""
     },
     "Environment": {
       "type": "string",
@@ -105,12 +109,45 @@
     "startTime": {
       "type": "string",
       "defaultValue": "23:00"
+    },
+    "exisitingAutomationAccount": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "existingAutomationAccountRg": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "existingLogicAppRg": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "exisitingStorageAccount": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "existingStorageAccountRg": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "storageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Premium_LRS",
+        "Premium_ZRS",
+        "Standard_GRS",
+        "Standard_GZRS",
+        "Standard_LRS",
+        "Standard_RAGRS",
+        "Standard_RAGZRS",
+        "Standard_ZRS"
+      ]
     }
   },
   "variables": {
-    "workflows_GetImageVersion_name": "[format('{0}-CheckImageVersion-la', parameters('hostPoolName'))]",
-    "workflows_GetBlobUpdate_name": "[format('{0}-CheckForBlobUpdate-la', parameters('hostPoolName'))]",
-    "subscriptionId": "[subscription().subscriptionId]",
+    "workflows_GetImageVersion_name": "[format('la-{0}-avd-imageVersion', parameters('hostPoolName'))]",
+    "workflows_GetBlobUpdate_name": "[format('la-{0}-avd-blobUpdate', parameters('hostPoolName'))]",
     "recurrenceType": "Recurrence",
     "waitForRunBook": true,
     "officeConnectionName": "office365",
@@ -124,7 +161,7 @@
     "checkBothCreatedAndModifiedDateTime": false,
     "maxFileCount": 10,
     "roleId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
-    "runbookNewHostPoolRipAndReplace": "New-HostPoolRipAndReplace",
+    "runbookNewHostPoolRipAndReplace": "Start-AzureVirtualDesktopRipAndReplace",
     "runbookScheduleRunbookName": "Get-RunBookSchedule",
     "runbookGetSessionHostVm": "Get-SessionHostVirtualMachine",
     "runbookMarketPlaceImageVersion": "Get-MarketPlaceImageVersion",
@@ -142,8 +179,8 @@
         "uri": "https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Get-SessionHostVirtualMachine.ps1"
       },
       {
-        "name": "New-HostPoolRipAndReplace",
-        "uri": "https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/New-HostPoolRipAndReplace.ps1"
+        "name": "Start-AzureVirtualDesktopRipAndReplace",
+        "uri": "https://raw.githubusercontent.com/mikedzikowski/logicapps/main/runbooks/Start-AzureVirtualDesktopRipAndReplace.ps1"
       },
       {
         "name": "New-AutomationSchedule",
@@ -205,14 +242,20 @@
     },
     "LocationShortName": "[variables('LocationShortNames')[parameters('location')]]",
     "NamingStandard": "[format('{0}-{1}', parameters('Environment'), variables('LocationShortName'))]",
-    "ResourceGroups": [
-      "[format('rg-{0}-aa', variables('NamingStandard'))]",
-      "[format('rg-{0}-la', variables('NamingStandard'))]",
-      "[format('rg-{0}-storage', variables('NamingStandard'))]"
-    ],
     "storageAccountName": "[replace(format('sa{0}', variables('NamingStandard')), '-', '')]",
-    "automationAccountName": "[format('aa-{0}', variables('NamingStandard'))]",
-    "cloud": "[environment().name]"
+    "automationAccountRgVar": "[if(not(empty(parameters('existingAutomationAccountRg'))), createArray(parameters('existingAutomationAccountRg')), createArray(format('rg-{0}-aa', variables('NamingStandard'))))]",
+    "logicAppRgVar": "[if(not(empty(parameters('existingLogicAppRg'))), createArray(parameters('existingLogicAppRg')), createArray(format('rg-{0}-la', variables('NamingStandard'))))]",
+    "storageAccountRgVar": "[if(not(empty(parameters('existingStorageAccountRg'))), createArray(parameters('existingStorageAccountRg')), createArray(format('rg-{0}-stg', variables('NamingStandard'))))]",
+    "storageAccountNameVar": "[if(not(empty(parameters('exisitingStorageAccount'))), createArray(parameters('exisitingStorageAccount')), createArray(replace(variables('storageAccountName'), 'sa', uniqueString(variables('NamingStandard')))))]",
+    "automationAccountNameVar": "[if(not(empty(parameters('exisitingAutomationAccount'))), createArray(parameters('exisitingAutomationAccount')), createArray(replace(format('aa-{0}', variables('NamingStandard')), 'aa', uniqueString(variables('NamingStandard')))))]",
+    "rg": "[array(concat(variables('automationAccountRgVar'), variables('logicAppRgVar'), variables('storageAccountRgVar')))]",
+    "rgVals": "[array(concat(variables('automationAccountRgVar'), variables('logicAppRgVar'), variables('storageAccountRgVar')))]",
+    "ResourceGroups": "[union(variables('rg'), variables('rgVals'))]",
+    "storageAccountNameValue": "[first(variables('storageAccountNameVar'))]",
+    "automationAccountNameValue": "[first(variables('automationAccountNameVar'))]",
+    "cloud": "[environment().name]",
+    "tenantId": "[tenant().tenantId]",
+    "subscriptionId": "[subscription().subscriptionId]"
   },
   "resources": [
     {
@@ -228,9 +271,9 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[variables('storageAccountName')]",
+      "name": "[format('sa-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[2]]",
+      "resourceGroup": "[variables('rg')[2]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -238,13 +281,13 @@
         "mode": "Incremental",
         "parameters": {
           "storageAccountName": {
-            "value": "[variables('storageAccountName')]"
+            "value": "[variables('storageAccountNameValue')]"
           },
           "location": {
             "value": "[parameters('location')]"
           },
           "storageAccountType": {
-            "value": "Standard_LRS"
+            "value": "[parameters('storageAccountType')]"
           },
           "containerName": {
             "value": "[parameters('container')]"
@@ -257,7 +300,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "16895415836152707902"
+              "templateHash": "6331672754009672065"
             }
           },
           "parameters": {
@@ -289,7 +332,7 @@
             {
               "type": "Microsoft.Storage/storageAccounts",
               "apiVersion": "2021-04-01",
-              "name": "[parameters('storageAccountName')]",
+              "name": "[uniqueString(parameters('storageAccountName'), resourceGroup().id)]",
               "location": "[parameters('location')]",
               "sku": {
                 "name": "[parameters('storageAccountType')]"
@@ -300,20 +343,20 @@
             {
               "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
               "apiVersion": "2021-06-01",
-              "name": "[format('{0}/default/{1}', parameters('storageAccountName'), parameters('containerName'))]",
+              "name": "[format('{0}/default/{1}', uniqueString(parameters('storageAccountName'), resourceGroup().id), parameters('containerName'))]",
               "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', uniqueString(parameters('storageAccountName'), resourceGroup().id))]"
               ]
             }
           ],
           "outputs": {
             "storageAccountName": {
               "type": "string",
-              "value": "[parameters('storageAccountName')]"
+              "value": "[uniqueString(parameters('storageAccountName'), resourceGroup().id)]"
             },
             "storageAccountId": {
               "type": "string",
-              "value": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+              "value": "[resourceId('Microsoft.Storage/storageAccounts', uniqueString(parameters('storageAccountName'), resourceGroup().id))]"
             }
           }
         }
@@ -325,9 +368,9 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[variables('automationAccountName')]",
+      "name": "[format('aa-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[0]]",
+      "resourceGroup": "[variables('rg')[0]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -335,7 +378,7 @@
         "mode": "Incremental",
         "parameters": {
           "automationAccountName": {
-            "value": "[variables('automationAccountName')]"
+            "value": "[variables('automationAccountNameValue')]"
           },
           "location": {
             "value": "[parameters('location')]"
@@ -428,7 +471,7 @@
       "apiVersion": "2020-10-01",
       "name": "[format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[1]]",
+      "resourceGroup": "[variables('rg')[1]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -493,9 +536,9 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -503,7 +546,7 @@
       "apiVersion": "2020-10-01",
       "name": "[format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[1]]",
+      "resourceGroup": "[variables('rg')[1]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -514,13 +557,13 @@
             "value": "[parameters('location')]"
           },
           "storageName": {
-            "value": "[variables('storageAccountName')]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.storageAccountName.value]"
           },
           "name": {
             "value": "[variables('blobConnectionName')]"
           },
           "saResourceGroup": {
-            "value": "[variables('ResourceGroups')[2]]"
+            "value": "[variables('rg')[2]]"
           },
           "subscriptionId": {
             "value": "[variables('subscriptionId')]"
@@ -583,10 +626,10 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -594,7 +637,7 @@
       "apiVersion": "2020-10-01",
       "name": "[format('o365Connection-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[1]]",
+      "resourceGroup": "[variables('rg')[1]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -658,10 +701,10 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -669,7 +712,7 @@
       "apiVersion": "2020-10-01",
       "name": "[format('rbac-aaConnector-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[0]]",
+      "resourceGroup": "[variables('rg')[0]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -677,7 +720,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.imagePrincipalId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.imagePrincipalId.value]"
           },
           "roleId": {
             "value": "[variables('roleId')]"
@@ -690,7 +733,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "5413392750896876686"
+              "templateHash": "12395142138509701896"
             }
           },
           "parameters": {
@@ -713,7 +756,7 @@
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'))]",
+              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -725,19 +768,19 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -745,7 +788,7 @@
       "apiVersion": "2020-10-01",
       "name": "[format('rbac-blobConnector-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[0]]",
+      "resourceGroup": "[variables('rg')[0]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -753,7 +796,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.blobPrincipalId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.blobPrincipalId.value]"
           },
           "roleId": {
             "value": "[variables('roleId')]"
@@ -766,7 +809,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "5413392750896876686"
+              "templateHash": "12395142138509701896"
             }
           },
           "parameters": {
@@ -789,7 +832,7 @@
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'))]",
+              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -801,19 +844,19 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -829,7 +872,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))).outputs.aaIdentityId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.aaIdentityId.value]"
           },
           "roleId": {
             "value": "[variables('roleId')]"
@@ -842,7 +885,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "5413392750896876686"
+              "templateHash": "12395142138509701896"
             }
           },
           "parameters": {
@@ -865,7 +908,7 @@
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'))]",
+              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -877,19 +920,19 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -905,7 +948,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))).outputs.aaIdentityId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.aaIdentityId.value]"
           },
           "roleId": {
             "value": "[variables('roleId')]"
@@ -918,7 +961,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "5413392750896876686"
+              "templateHash": "12395142138509701896"
             }
           },
           "parameters": {
@@ -941,7 +984,7 @@
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'))]",
+              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -953,19 +996,19 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -973,7 +1016,7 @@
       "apiVersion": "2020-10-01",
       "name": "[format('rbac-automationAccount-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[0]]",
+      "resourceGroup": "[variables('rg')[0]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -981,7 +1024,7 @@
         "mode": "Incremental",
         "parameters": {
           "principalId": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))).outputs.aaIdentityId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.aaIdentityId.value]"
           },
           "roleId": {
             "value": "[variables('roleId')]"
@@ -994,7 +1037,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "5413392750896876686"
+              "templateHash": "12395142138509701896"
             }
           },
           "parameters": {
@@ -1017,7 +1060,7 @@
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'))]",
+              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -1029,19 +1072,19 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -1049,7 +1092,7 @@
       "apiVersion": "2020-10-01",
       "name": "[format('getImageVersionlogicApp-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[1]]",
+      "resourceGroup": "[variables('rg')[1]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -1073,6 +1116,12 @@
           },
           "subscriptionId": {
             "value": "[variables('subscriptionId')]"
+          },
+          "tenantId": {
+            "value": "[variables('tenantId')]"
+          },
+          "templateSpecId": {
+            "value": "[parameters('templateSpecId')]"
           },
           "emailContact": {
             "value": "[parameters('emailContact')]"
@@ -1099,13 +1148,13 @@
             "value": "[parameters('recurrenceInterval')]"
           },
           "automationAccountName": {
-            "value": "[variables('automationAccountName')]"
+            "value": "[variables('automationAccountNameValue')]"
           },
           "automationAccountLocation": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))).outputs.aaLocation.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.aaLocation.value]"
           },
           "automationAccountResourceGroup": {
-            "value": "[variables('ResourceGroups')[range(0, length(variables('ResourceGroups')))[0]]]"
+            "value": "[variables('rg')[0]]"
           },
           "runbookNewHostPoolRipAndReplace": {
             "value": "[variables('runbookNewHostPoolRipAndReplace')]"
@@ -1136,13 +1185,10 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "17308814542162786671"
+              "templateHash": "3684960229930165143"
             }
           },
           "parameters": {
-            "subscriptionId": {
-              "type": "string"
-            },
             "workflows_GetImageVersion_name": {
               "type": "string"
             },
@@ -1188,9 +1234,6 @@
             "waitForRunBook": {
               "type": "bool"
             },
-            "hostPoolName": {
-              "type": "string"
-            },
             "identityType": {
               "type": "string"
             },
@@ -1200,9 +1243,6 @@
             "officeConnectionName": {
               "type": "string"
             },
-            "cloud": {
-              "type": "string"
-            },
             "startTime": {
               "type": "string"
             },
@@ -1210,6 +1250,21 @@
               "type": "string"
             },
             "dayOfWeekOccurrence": {
+              "type": "string"
+            },
+            "cloud": {
+              "type": "string"
+            },
+            "tenantId": {
+              "type": "string"
+            },
+            "subscriptionId": {
+              "type": "string"
+            },
+            "hostPoolName": {
+              "type": "string"
+            },
+            "templateSpecId": {
               "type": "string"
             }
           },
@@ -1299,7 +1354,10 @@
                                       "DayOfWeekOccurrence": "[parameters('dayOfWeekOccurrence')]",
                                       "environment": "[parameters('cloud')]",
                                       "runbookName": "[parameters('runbookNewHostPoolRipAndReplace')]",
-                                      "HostPoolName": "[parameters('hostPoolName')]"
+                                      "HostPoolName": "[parameters('hostPoolName')]",
+                                      "TenantId": "[parameters('tenantId')]",
+                                      "TemplateSpecId": "[parameters('templateSpecId')]",
+                                      "SubscriptionId": "[parameters('subscriptionId')]"
                                     }
                                   }
                                 },
@@ -1621,12 +1679,12 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('o365Connection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('o365Connection-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     },
     {
@@ -1634,7 +1692,7 @@
       "apiVersion": "2020-10-01",
       "name": "[format('getBlobUpdateLogicApp-deployment-{0}', parameters('deploymentNameSuffix'))]",
       "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('ResourceGroups')[1]]",
+      "resourceGroup": "[variables('rg')[1]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -1651,10 +1709,10 @@
             "value": "[variables('automationAccountConnectionName')]"
           },
           "automationAccountName": {
-            "value": "[variables('automationAccountName')]"
+            "value": "[variables('automationAccountNameValue')]"
           },
           "automationAccountResourceGroup": {
-            "value": "[variables('ResourceGroups')[range(0, length(variables('ResourceGroups')))[0]]]"
+            "value": "[variables('rg')[0]]"
           },
           "blobConnectionName": {
             "value": "[variables('blobConnectionName')]"
@@ -1681,7 +1739,7 @@
             "value": "[parameters('triggerInterval')]"
           },
           "storageAccountName": {
-            "value": "[variables('storageAccountName')]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.storageAccountName.value]"
           },
           "container": {
             "value": "[parameters('container')]"
@@ -2060,12 +2118,26 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[0]), 'Microsoft.Resources/deployments', variables('automationAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('ResourceGroups')[2]), 'Microsoft.Resources/deployments', variables('storageAccountName'))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
     }
-  ]
+  ],
+  "outputs": {
+    "automationAccountName": {
+      "type": "string",
+      "value": "[variables('automationAccountNameValue')]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.storageAccountName.value]"
+    },
+    "ResourceGroups": {
+      "type": "array",
+      "value": "[array(concat(variables('automationAccountRgVar'), variables('logicAppRgVar'), variables('storageAccountRgVar')))]"
+    }
+  }
 }

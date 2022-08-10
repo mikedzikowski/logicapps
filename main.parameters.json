@@ -2,8 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "location": {
+            "value": "usgovvirginia"
+        },
+        "templateSpecId": {
+            "value": "/subscriptions/f4972a61-1083-4904-a4e2-a790107320bf/resourceGroups/tempspec/providers/Microsoft.Resources/templateSpecs/fs"
+        },
         "Environment": {
-            "value": "d"
+            "value": "s"
         },
         "recurrenceFrequency": {
             "value": "Day"
@@ -15,10 +21,10 @@
             "value": "micdz@microsoft.com"
         },
         "container": {
-            "value": "container"
+            "value": "fsavd"
         },
         "hostPoolName": {
-            "value": "ProdMirror"
+            "value": "hp-fs-peo-va-d-00"
         },
         "triggerFrequency": {
             "value": "Day"
@@ -27,13 +33,10 @@
             "value": 1
         },
         "hostPoolResourceGroupName": {
-            "value": "rg-sharedservices-til-001"
+            "value": "rg-fs-peo-va-d-management-00"
         },
         "sessionHostResourceGroupName": {
-            "value": "rg-sharedservices-til-001"
-        },
-        "deploymentNameSuffix": {
-            "value": "" // TODO: Fill in parameter value
+            "value": "rg-fs-peo-va-d-hosts-00"
         },
         "dayOfWeek": {
             "value": "Saturday"
@@ -43,6 +46,21 @@
         },
         "startTime": {
             "value": "23:00"
+        },
+        "exisitingAutomationAccount": {
+            "value": "aa-fs-peo-va-d-00-rap"
+        },
+        "existingAutomationAccountRg": {
+            "value": "rg-fs-peo-va-d-management-00"
+        },
+        "existingLogicAppRg": {
+            "value": "rg-fs-peo-va-d-management-00"
+        },
+        "exisitingStorageAccount": {
+            "value": ""
+        },
+        "existingStorageAccountRg": {
+            "value": "rg-fs-peo-va-d-storage-00"
         }
     }
 }

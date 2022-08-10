@@ -1,4 +1,3 @@
-param subscriptionId string
 param workflows_GetImageVersion_name string
 param automationAccountConnectionName string
 param location string
@@ -14,14 +13,17 @@ param getRunbookScheduleRunbookName string
 param getRunbookGetSessionHostVm string
 param getGetMarketPlaceImageVersion string
 param waitForRunBook bool
-param hostPoolName string
 param identityType string
 param emailContact string
 param officeConnectionName string
-param cloud string
 param startTime string
 param dayOfWeek string
 param dayOfWeekOccurrence string
+param cloud string
+param tenantId string
+param subscriptionId string
+param hostPoolName string
+param templateSpecId string
 
 resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetImageVersion_name
@@ -109,6 +111,9 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                             environment: cloud
                             runbookName: runbookNewHostPoolRipAndReplace
                             HostPoolName: hostPoolName
+                            TenantId: tenantId
+                            TemplateSpecId: templateSpecId
+                            SubscriptionId: subscriptionId
                           }
                         }
                       }

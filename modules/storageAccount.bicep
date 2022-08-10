@@ -14,7 +14,7 @@ param storageAccountName string
 param containerName string
 
 resource sa 'Microsoft.Storage/storageAccounts@2021-04-01' = {
-  name: storageAccountName
+  name: uniqueString(storageAccountName, resourceGroup().id)
   location: location
   sku: {
     name: storageAccountType
@@ -27,5 +27,5 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
   name: '${sa.name}/default/${containerName}'
 }
 
-output storageAccountName string = storageAccountName
+output storageAccountName string = sa.name
 output storageAccountId string = sa.id

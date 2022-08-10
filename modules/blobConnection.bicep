@@ -2,7 +2,7 @@ param storageName string
 param location string
 param name string
 param subscriptionId string
-param saResourceGroup string 
+param saResourceGroup string
 
 resource storage 'Microsoft.Storage/storageAccounts@2021-06-01' existing = {
   name: storageName
