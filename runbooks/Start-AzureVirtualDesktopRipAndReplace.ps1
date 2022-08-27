@@ -44,7 +44,11 @@ $SessionHosts = Get-AzWvdSessionHost `
 
 $SessionHostsCount = $SessionHosts.count
 
-$SasToken = Read-Host -AsSecureString
+# Need to add keyvault to build and setting secrets to build
+$SasToken = (Get-AzKeyVaultSecret -VaultName "kv-fs-peo-va-d-01" -Name "sas") | ConvertTo-SecureString -AsPlainText -Force
+$DomainJoinPassword =  (Get-AzKeyVaultSecret -VaultName "kv-fs-peo-va-d-01" -Name "dj") | ConvertTo-SecureString -AsPlainText -Force
+$vmPassword =  (Get-AzKeyVaultSecret -VaultName "kv-fs-peo-va-d-01" -Name "vmpw") | ConvertTo-SecureString -AsPlainText -Force
+
 
 # Get details for deployment params
 $Params = @{
@@ -80,7 +84,11 @@ $Params = @{
     Subnet = 'Clients' # need to dynamically retrieve this value
     Timestamp = $TimeStamp # need to dynamically retrieve this value
     ValidationEnvironment = $true
-    ScriptContainerSasToken =  $SasToken
+    ScriptContainerSasToken = $SasToken
+    DomainJoinPassword = $DomainJoinPassword
+    DomainJoinUserPrincipalName = 'joinaadds@mvdlab.onmicrosoft.us'
+    VmPassword = $vmPassword
+    VmUserName = 'xdmin'
 }
 
 # Put all session hosts in drain mode
