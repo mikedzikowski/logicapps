@@ -6,7 +6,7 @@
             "value": "usgovvirginia"
         },
         "templateSpecId": {
-            "value": "/subscriptions/f4972a61-1083-4904-a4e2-a790107320bf/resourceGroups/tempspec/providers/Microsoft.Resources/templateSpecs/fs"
+            "value": "/subscriptions/f4972a61-1083-4904-a4e2-a790107320bf/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/avd/versions/1.1"
         },
         "Environment": {
             "value": "s"
@@ -24,7 +24,7 @@
             "value": "fsavd"
         },
         "hostPoolName": {
-            "value": "hp-fs-peo-va-d-00"
+            "value": "hp-fs-peo-va-d-01"
         },
         "triggerFrequency": {
             "value": "Day"
@@ -33,10 +33,10 @@
             "value": 1
         },
         "hostPoolResourceGroupName": {
-            "value": "rg-fs-peo-va-d-management-00"
+            "value": "rg-fs-peo-va-d-management-01"
         },
         "sessionHostResourceGroupName": {
-            "value": "rg-fs-peo-va-d-hosts-00"
+            "value": "rg-fs-peo-va-d-hosts-01"
         },
         "dayOfWeek": {
             "value": "Saturday"
@@ -48,19 +48,19 @@
             "value": "23:00"
         },
         "exisitingAutomationAccount": {
-            "value": "aa-fs-peo-va-d-00-rap"
+            "value": "aa-fs-peo-va-d-00-rar"
         },
         "existingAutomationAccountRg": {
-            "value": "rg-fs-peo-va-d-management-00"
+            "value": "rg-fs-peo-va-d-management-01"
         },
         "existingLogicAppRg": {
-            "value": "rg-fs-peo-va-d-management-00"
+            "value": "rg-fs-peo-va-d-management-01"
         },
         "exisitingStorageAccount": {
-            "value": ""
+            "value": "stfspeovad0111"
         },
         "existingStorageAccountRg": {
-            "value": "rg-fs-peo-va-d-storage-00"
+            "value": "rg-fs-peo-va-d-storage-01"
         }
     }
 }

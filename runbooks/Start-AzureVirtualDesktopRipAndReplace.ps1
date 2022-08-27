@@ -32,14 +32,23 @@ $HostPool = Get-AzResource -ResourceType 'Microsoft.DesktopVirtualization/hostpo
 $HostPoolResourceGroup = $HostPool.ResourceGroupName
 $HostPoolInfo = Get-AzWvdHostPool -ResourceGroupName $HostPoolResourceGroup -Name $HostPoolName
 $AppGroupResourceId = $HostPoolInfo.ApplicationGroupReference[-1]
-$SecurityPrincipalIds = (Get-AzRoleAssignment -Scope $AppGroupResourceId -RoleDefinitionName 'Desktop Virtualization User').ObjectId
+$SecurityPrincipalIds = @(Get-AzRoleAssignment -Scope $AppGroupResourceId -RoleDefinitionName 'Desktop Virtualization User').ObjectId
 $HostPoolTags = $HostPool.Tags
 $Configuration = $HostPoolTags.AvdConfiguration | ConvertFrom-Json
 $SoftwareSettings = $HostPoolTags.AvdSoftware | ConvertFrom-Json
+$TimeStamp = (Get-Date -Format 'yyyyMMddhhmmss')
+# Get all session hosts
+$SessionHosts = Get-AzWvdSessionHost `
+    -ResourceGroupName $HostPoolResourceGroup `
+    -HostPoolName $HostPoolName
+
+$SessionHostsCount = $SessionHosts.count
+
+$SasToken = Read-Host -AsSecureString
 
 # Get details for deployment params
-$Params = {
-    AddOrReplace = $true
+$Params = @{
+    AddOrReplaceSessionHosts = $true
     DeployAip = $SoftwareSettings.DeployAip
     DeployAppMaskingRules = $SoftwareSettings.DeployAppMaskingRules
     DeployProjectVisio = $SoftwareSettings.DeployProjectVisio
@@ -52,26 +61,27 @@ $Params = {
     ImageOffer = $Configuration.Image.Split(':')[1]
     ImagePublisher = $Configuration.Image.Split(':')[0]
     ImageSku = $Configuration.Image.Split(':')[2]
-    ImageVersion = $Configuration.Image.Split(':')[3]
+    ImageVersion = 'latest'
     LogAnalyticsWorkspaceId = $HostPoolTags.AvdMonitoring
     MissionOwnerShortName = $HostPoolName.Split('-')[2]
     RecoveryServices = $Configuration.RecoveryServices
     ScreenCaptureProtection = $SoftwareSettings.ScreenCaptureProtection
     ScriptContainerUri = $HostPoolTags.AvdContainer
-    SecurityPrincipalIds = $SecurityPrincipalIds
+    SecurityPrincipalIds = @($SecurityPrincipalIds)
     SessionHostOuPath = $HostPoolTags.AvdOuPath
     StampIndex = $HostPoolName.Split('-')[5].ToInt32($null)
     TenantShortName = $HostPoolName.Split('-')[1]
     VmSize = $Configuration.VmSize
+    SessionHostCount = $SessionHostsCount
+    VirtualNetwork = 'vnet-shd-net-d-va' # need to dynamically retrieve this value
+    VirtualNetwork2 = 'vnet-shd-net-d-va-01' # need to dynamically retrieve this value if more than one vNet is present in environment
+    VirtualNetwork3 = 'vnet-shd-net-d-va-02' # need to dynamically retrieve this value if more than one vNet is present in environment
+    VirtualNetworkResourceGroup = 'rg-shd-net-d-va' # need to dynamically retrieve this value (?)
+    Subnet = 'Clients' # need to dynamically retrieve this value
+    Timestamp = $TimeStamp # need to dynamically retrieve this value
+    ValidationEnvironment = $true
+    ScriptContainerSasToken =  $SasToken
 }
-
-# Get all session hosts
-$SessionHosts = Get-AzWvdSessionHost `
-    -ResourceGroupName $HostPoolResourceGroup `
-    -HostPoolName $HostPoolName
-
-# Get the resource group for the session hosts
-$SessionHostsResourceGroup = $SessionHosts[0].ResourceId.Split('/')[4]
 
 # Put all session hosts in drain mode
 foreach($SessionHost in $SessionHosts)
@@ -141,6 +151,5 @@ New-AzSubscriptionDeployment `
     -Location $HostPool.Location `
     -Name $(Get-Date -F 'yyyyMMddHHmmss') `
     -TemplateSpecId $TemplateSpecId `
-    @Params
+    @params
 
-# Remove Runbook Schedule
