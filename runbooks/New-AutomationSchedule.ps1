@@ -11,7 +11,8 @@ param (
     [parameter(mandatory = $true)]$HostPoolName,
     [parameter(mandatory = $true)]$TenantId,
     [parameter(mandatory = $true)]$SubscriptionId,
-    [parameter(mandatory = $true)]$TemplateSpecId
+    [parameter(mandatory = $true)]$TemplateSpecId,
+    [parameter(mandatory = $true)]$KeyVault
 )
 
 Connect using a Managed Service Identity
