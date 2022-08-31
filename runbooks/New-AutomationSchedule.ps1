@@ -15,7 +15,7 @@ param (
     [parameter(mandatory = $true)]$KeyVault
 )
 
-Connect using a Managed Service Identity
+#Connect using a Managed Service Identity
 try
 {
     $AzureContext = (Connect-AzAccount -Identity -Environment $Environment).context
@@ -39,7 +39,7 @@ $params = @{
 "TenantId"       = $TenantId;
 "SubscriptionId" = $SubscriptionId;
 "TemplateSpecId" = $TemplateSpecId;
-"KeyVault" = $KeyVault
+"KeyVault"       = $KeyVault
 }
 # Register Automation Schedule to Runbook
 Register-AzAutomationScheduledRunbook -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -RunbookName $RunbookName -ScheduleName $ScheduleName -Parameters $params
