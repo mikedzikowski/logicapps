@@ -90,9 +90,12 @@ param existingStorageAccountRg string = ''
   'Standard_ZRS'
 ])
 param storageAccountType string = 'Standard_LRS'
+param keyVaultName string = 'kv-fs-peo-va-d-01'
 
 // Variables
-// GetImageVersion Logic App Parameters
+var cloud = environment().name
+var tenantId = tenant().tenantId
+var subscriptionId = subscription().subscriptionId
 var workflows_GetImageVersion_name = 'la-${hostPoolName}-avd-imageVersion'
 var workflows_GetBlobUpdate_name = 'la-${hostPoolName}-avd-blobUpdate'
 var recurrenceType = 'Recurrence'
@@ -227,10 +230,6 @@ var rgVals = (array(concat(automationAccountRgVar,logicAppRgVar,storageAccountRg
 var ResourceGroups = union(rg, rgVals)
 var storageAccountNameValue = first(storageAccountNameVar)
 var automationAccountNameValue = first(automationAccountNameVar)
-
-var cloud = environment().name
-var tenantId = tenant().tenantId
-var subscriptionId = subscription().subscriptionId
 
 // Resource Groups needed for the solution
 resource resourceGroups 'Microsoft.Resources/resourceGroups@2020-10-01' = [for i in range(0, length((ResourceGroups))): {
@@ -436,6 +435,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     waitForRunBook: waitForRunBook
     hostPoolName: hostPoolName
     identityType: identityType
+    keyVaultName: keyVault.outputs.keyVaultName
   }
   dependsOn: [
     automationAccount
@@ -483,6 +483,22 @@ module getBlobUpdateLogicApp 'modules/logicAppGetBlobUpdate.bicep' = {
   ]
 }
 
+module keyVault 'modules/keyVault.bicep' = {
+  name: 'kv-deployment-${deploymentNameSuffix}'
+  scope: resourceGroup(subscriptionId, rg[1])
+  params:{
+    location: location
+    keyvaultName: keyVaultName
+    aaIdentityId: automationAccount.outputs.aaIdentityId
+  }
+  dependsOn: [
+    automationAccount
+    automationAccountConnection
+    resourceGroups
+  ]
+}
+
 output automationAccountName string = automationAccountNameValue
 output storageAccountName string = storageAccount.outputs.storageAccountName
 output ResourceGroups array = array(concat(automationAccountRgVar,logicAppRgVar,storageAccountRgVar))
+output keyVaultName string = keyVault.outputs.keyVaultName

@@ -20,7 +20,7 @@ resource automationAccount 'Microsoft.Automation/automationAccounts@2021-06-22' 
   }
 }
 
-resource runbookDeployment 'Microsoft.Automation/automationAccounts/runbooks@2019-06-01'  = [for (runbook, i) in runbookNames: {
+resource runbookDeployment 'Microsoft.Automation/automationAccounts/runbooks@2019-06-01' = [for (runbook, i) in runbookNames: {
   name: runbook.name
   parent: automationAccount
   location: location
