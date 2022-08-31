@@ -7,6 +7,9 @@ Param (
     [string]$HostPoolName,
 
     [Parameter(Mandatory)]
+    [string]$KeyVault,
+
+    [Parameter(Mandatory)]
     [string]$SubscriptionId,
 
     [Parameter(Mandatory)]
@@ -37,6 +40,7 @@ $HostPoolTags = $HostPool.Tags
 $Configuration = $HostPoolTags.AvdConfiguration | ConvertFrom-Json
 $SoftwareSettings = $HostPoolTags.AvdSoftware | ConvertFrom-Json
 $TimeStamp = (Get-Date -Format 'yyyyMMddhhmmss')
+
 # Get all session hosts
 $SessionHosts = Get-AzWvdSessionHost `
     -ResourceGroupName $HostPoolResourceGroup `
@@ -45,10 +49,11 @@ $SessionHosts = Get-AzWvdSessionHost `
 $SessionHostsCount = $SessionHosts.count
 
 # Need to add keyvault to build and setting secrets to build
-$SasToken = (Get-AzKeyVaultSecret -VaultName "kv-fs-peo-va-d-01" -Name "sas") | ConvertTo-SecureString -AsPlainText -Force
-$DomainJoinPassword =  (Get-AzKeyVaultSecret -VaultName "kv-fs-peo-va-d-01" -Name "dj") | ConvertTo-SecureString -AsPlainText -Force
-$vmPassword =  (Get-AzKeyVaultSecret -VaultName "kv-fs-peo-va-d-01" -Name "vmpw") | ConvertTo-SecureString -AsPlainText -Force
-
+$SasToken = (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "sas").SecretValue
+$DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "djuser" -AsPlainText)
+$DomainJoinPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "dj").SecretValue
+$vmUser =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmuser" -AsPlainText)
+$vmPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmpw").SecretValue
 
 # Get details for deployment params
 $Params = @{
@@ -82,13 +87,13 @@ $Params = @{
     VirtualNetwork3 = 'vnet-shd-net-d-va-02' # need to dynamically retrieve this value if more than one vNet is present in environment
     VirtualNetworkResourceGroup = 'rg-shd-net-d-va' # need to dynamically retrieve this value (?)
     Subnet = 'Clients' # need to dynamically retrieve this value
-    Timestamp = $TimeStamp # need to dynamically retrieve this value
+    Timestamp = $TimeStamp
     ValidationEnvironment = $true
     ScriptContainerSasToken = $SasToken
     DomainJoinPassword = $DomainJoinPassword
-    DomainJoinUserPrincipalName = 'joinaadds@mvdlab.onmicrosoft.us'
+    DomainJoinUserPrincipalName = $DomainJoinUser
     VmPassword = $vmPassword
-    VmUserName = 'xdmin'
+    VmUserName =  $vmUser
 }
 
 # Put all session hosts in drain mode
@@ -100,6 +105,7 @@ foreach($SessionHost in $SessionHosts)
         -Name $SessionHost.Id.Split('/')[-1] `
         -AllowNewSession:$false `
         | Out-Null
+        $SessionHostsResourceGroup = ($SessionHost).id.split("/")[8]
 }
 
 # Get all active sessions
@@ -114,6 +120,7 @@ foreach($Session in $Sessions)
     $SessionHost = $Session.Id.split('/')[-3]
     $UserSessionId = $Session.Id.split('/')[-1]
 
+    Write-Verbose "Sending maintenance message to user id: $($UserSessionId)"
     Send-AzWvdUserSessionMessage  `
         -ResourceGroupName $HostPoolResourceGroup `
         -HostPoolName $HostPoolName `
@@ -137,6 +144,7 @@ foreach($Session in $Sessions)
         -HostPoolName $HostPoolName `
         -SessionHostName $SessionHost `
         -Id $UserSessionId
+    Write-Verbose "Logging out user id: $($UserSessionId)"
 }
 
 # Remove the session hosts from the Host Pool
@@ -147,13 +155,16 @@ foreach($SessionHost in $SessionHosts)
         -HostPoolName $HostPoolName `
         -Name $SessionHost.Id.Split('/')[-1] `
         | Out-Null
+    Write-Verbose "Removing session host $($SessionHost) from the pool $($HostPoolName)"
 }
 
-# Delete the resource group containing only the session hosts
-Remove-AzResourceGroup `
-    -Name $SessionHostsResourceGroup `
-    -Force
+$SessionHostsRg = (Get-AzResourceGroup | Where-Object {$_.resourceGroupName -eq $SessionHostsResourceGroup})
 
+Remove-AzResourceGroup `
+	-Name $SessionHostsRg.ResourceGroupName `
+	-Force
+
+Write-Verbose "Deploying new session hosts to the pool $($HostPoolName)"
 # Deploy new session hosts to the host pool
 New-AzSubscriptionDeployment `
     -Location $HostPool.Location `
@@ -161,3 +172,4 @@ New-AzSubscriptionDeployment `
     -TemplateSpecId $TemplateSpecId `
     @params
 
+Update-AzTag -resourceId $SessionHostsRg.ResourceId -Tag $HostPoolTags -operation Replace
