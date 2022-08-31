@@ -38,7 +38,8 @@ $params = @{
 "HostPoolName"   = $HostPoolName;
 "TenantId"       = $TenantId;
 "SubscriptionId" = $SubscriptionId;
-"TemplateSpecId" = $TemplateSpecId
+"TemplateSpecId" = $TemplateSpecId;
+"KeyVault" = $KeyVault
 }
 # Register Automation Schedule to Runbook
 Register-AzAutomationScheduledRunbook -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -RunbookName $RunbookName -ScheduleName $ScheduleName -Parameters $params
