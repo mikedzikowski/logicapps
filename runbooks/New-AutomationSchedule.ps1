@@ -42,7 +42,7 @@ $Params = @{
 "KeyVault"       = $KeyVault;
 "AutomationAccount" = $AutomationAccountName;
 "AutomationAccountResourceGroupName" = $ResourceGroupName;
-"Schedule" = $ScheduleName
+"ScheduleName" = $ScheduleName
 }
 # Register Automation Schedule to Runbook
 Register-AzAutomationScheduledRunbook -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -RunbookName $RunbookName -ScheduleName $ScheduleName -Parameters $Params
