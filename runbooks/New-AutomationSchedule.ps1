@@ -40,7 +40,7 @@ $Params = @{
 "SubscriptionId" = $SubscriptionId;
 "TemplateSpecId" = $TemplateSpecId;
 "KeyVault"       = $KeyVault;
-"AutomationAccount" = $AutomationAccountName;
+"AutomationAccountName" = $AutomationAccountName;
 "AutomationAccountResourceGroupName" = $ResourceGroupName;
 "ScheduleName" = $ScheduleName
 }
