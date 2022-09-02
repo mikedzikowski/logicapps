@@ -41,7 +41,7 @@ $Params = @{
 "TemplateSpecId" = $TemplateSpecId;
 "KeyVault"       = $KeyVault;
 "AutomationAccount" = $AutomationAccountName;
-"AutomationAccountResourceGroup" = $ResourceGroupName;
+"AutomationAccountResourceGroupName" = $ResourceGroupName;
 "Schedule" = $ScheduleName
 }
 # Register Automation Schedule to Runbook
