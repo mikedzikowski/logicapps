@@ -1,7 +1,9 @@
 targetScope = 'subscription'
 
+@description('The location for the resources deployed in this solution.')
 param location string = deployment().location
 
+@description('The Template Spec version ID that will be used to by the rip and replace AVD solution.')
 param templateSpecId string = ''
 
 // Environment
@@ -10,26 +12,28 @@ param templateSpecId string = ''
   'd' // Development
   's' // Staging
 ])
+@description('The target environment for the solution. This value will be used by naming convention if exisiting resources are not targeted.')
 param Environment string = 'd'
 
-@allowed([
-  'Month'
-  'Week'
-  'Day'
-  'Hour'
-  'Minute'
-  'Second'
-])
-param recurrenceFrequency string = 'Day'
-param recurrenceInterval int = 1
+@description('Set the following values if there are exisiting resource groups, automation accounts, or storage account that should be targeted. If values are not set a default naming convention will be used by resources created.')
+param exisitingAutomationAccount string = ''
+param existingAutomationAccountRg string = ''
+param existingLogicAppRg string = ''
+param exisitingStorageAccount string = ''
+param existingStorageAccountRg string = ''
 
-// Email Contact for Approval Flow
-param emailContact string = ''
-
-// Get BlobUpdate Logic App Parameters
-param container string = ''
+@description('Host pool name to target.')
 param hostPoolName string = ''
 
+@description('Host pool resource group name to target.')
+param hostPoolResourceGroupName string = ''
+
+@description('Session host resource group name to target.')
+param sessionHostResourceGroupName string = ''
+
+@description('deployment name suffix.')
+param deploymentNameSuffix string = utcNow()
+
 @allowed([
   'Month'
   'Week'
@@ -38,16 +42,27 @@ param hostPoolName string = ''
   'Minute'
   'Second'
 ])
+@description('Frequency of logic app trigger for Image Check Logic App.')
+param recurrenceFrequency string = 'Day'
+
+@description('Interval of logic app trigger for Image Check Logic App.')
+param recurrenceInterval int = 1
+
+@description('E-mail contact or group used by logic app approval workflow.')
+param emailContact string = ''
+
+@allowed([
+  'Month'
+  'Week'
+  'Day'
+  'Hour'
+  'Minute'
+  'Second'
+])
+@description('Frequency of logic app trigger for Blob Check Logic App.')
 param triggerFrequency string = 'Day'
+@description('Interval of logic app trigger for Blob Check Logic App.')
 param triggerInterval int = 1
-
-// Exisiting AVD resource group
-param hostPoolResourceGroupName string = ''
-
-param sessionHostResourceGroupName string = ''
-
-// UTC
-param deploymentNameSuffix string = utcNow()
 
 // Maintence Window
 @allowed([
@@ -59,6 +74,7 @@ param deploymentNameSuffix string = utcNow()
   'Saturday'
   'Sunday'
 ])
+@description('The target maintenance window day for AVD')
 param dayOfWeek string = 'Saturday'
 
 @allowed([
@@ -68,16 +84,11 @@ param dayOfWeek string = 'Saturday'
   'Fourth'
   'LastDay'
 ])
+@description('The target maintenance window week occurrence for AVD')
 param dayOfWeekOccurrence string = 'First'
 
+@description('The target maintenance window start time for AVD')
 param startTime string = '23:00'
-
-// Set values if there are exisiting resource groups, automation accounts, or storage account that should be targeted
-param exisitingAutomationAccount string = ''
-param existingAutomationAccountRg string = ''
-param existingLogicAppRg string = ''
-param exisitingStorageAccount string = ''
-param existingStorageAccountRg string = ''
 
 @allowed([
   'Premium_LRS'
@@ -89,8 +100,14 @@ param existingStorageAccountRg string = ''
   'Standard_RAGZRS'
   'Standard_ZRS'
 ])
+@description('The storage SKU for the application blob storage.')
 param storageAccountType string = 'Standard_LRS'
-param keyVaultName string = 'kv-fs-peo-va-d-01'
+
+// Get BlobUpdate Logic App Parameters
+param container string = ''
+
+@description('The name of the key vault where secrets will be stored and consumed by runbooks. If deploying a new key vault, this value must be globally unique.')
+param keyVaultName string = 'kv-fs-contoso-va-d-01'
 
 // Variables
 var cloud = environment().name
@@ -321,6 +338,7 @@ module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = 
   params: {
     principalId: getImageVersionlogicApp.outputs.imagePrincipalId
     roleId: roleId
+    scope: 'resourceGroup().id'
   }
   dependsOn: [
     automationAccount
@@ -387,12 +405,11 @@ module rbacSessionHostPermissionAzureAutomationAccount 'modules/rbacPermissions.
   ]
 }
 
-module rbacPermissionAzureAutomationAccountRg 'modules/rbacPermissions.bicep' = {
-  name: 'rbac-automationAccount-deployment-${deploymentNameSuffix}'
-  scope: resourceGroup(subscriptionId, rg[0])
+module rbacPermissionAzureAutomationAccountRg 'modules/rbacPermissionsSubscriptionScope.bicep' = {
+  name: 'rbac-automationAccountOwner-deployment-${deploymentNameSuffix}'
   params: {
     principalId: automationAccount.outputs.aaIdentityId
-    roleId: roleId
+    scope: subscription().id
   }
   dependsOn: [
     automationAccount
@@ -435,7 +452,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     waitForRunBook: waitForRunBook
     hostPoolName: hostPoolName
     identityType: identityType
-    keyVaultName: keyVault.outputs.keyVaultName
+    keyVaultName: keyVaultName
   }
   dependsOn: [
     automationAccount
@@ -444,6 +461,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     o365Connection
     storageAccount
     resourceGroups
+    keyVault
   ]
 }
 
