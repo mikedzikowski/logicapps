@@ -154,6 +154,10 @@ foreach($Session in $Sessions)
         -SessionHostName $SessionHost `
         -Id $UserSessionId
     Write-Verbose "Logging out user id: $($UserSessionId)"
+    $SessionHostsName = $SessionHost.Id.Split('/')[-1]
+    $vmName = $SessionHostsName.Split('.')[-4]
+    $SessionHostsResourceGroup = (Get-AzVm -Name $vmName).ResourceGroupName
+    $SessionHostsResourceGroupId = (Get-AzResourceGroup -Name $SessionHostsResourceGroup).ResourceId
 }
 
 # Remove the session hosts from the Host Pool
@@ -167,10 +171,8 @@ foreach($SessionHost in $SessionHosts)
     Write-Verbose "Removing session host $($SessionHost) from the pool $($HostPoolName)"
 }
 
-$SessionHostsRg = (Get-AzResourceGroup | Where-Object {$_.resourceGroupName -eq $SessionHostsResourceGroup})
-
 Remove-AzResourceGroup `
-	-Name $SessionHostsRg.ResourceGroupName `
+	-Name $SessionHostsResourceGroup `
 	-Force
 
 Write-Verbose "Deploying new session hosts to the pool $($HostPoolName)"
@@ -181,8 +183,8 @@ New-AzSubscriptionDeployment `
     -TemplateSpecId $TemplateSpecId `
     @params
 
-# Replacing Tags 
-Update-AzTag -resourceId $SessionHostsRg.ResourceId -Tag $HostPoolTags -Operation Replace
+# Replacing Tags
+Update-AzTag -ResourceId $SessionHostsResourceGroupId -Tag $HostPoolTags -Operation Replace
 
 # Removing Azutomation Schedule
 Remove-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $ScheduleName -ResourceGroupName $AutomationAccountResourceGroupName
