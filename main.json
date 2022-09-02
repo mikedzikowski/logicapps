@@ -5,114 +5,42 @@
     "_generator": {
       "name": "bicep",
       "version": "0.7.4.23292",
-      "templateHash": "7868992321812348874"
+      "templateHash": "13180268401737732729"
     }
   },
   "parameters": {
     "location": {
       "type": "string",
-      "defaultValue": "[deployment().location]"
+      "defaultValue": "[deployment().location]",
+      "metadata": {
+        "description": "The location for the resources deployed in this solution."
+      }
     },
     "templateSpecId": {
       "type": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Template Spec version ID that will be used to by the rip and replace AVD solution."
+      }
     },
     "Environment": {
       "type": "string",
-      "defaultValue": "s",
+      "defaultValue": "d",
+      "metadata": {
+        "description": "The target environment for the solution. This value will be used by naming convention if exisiting resources are not targeted."
+      },
       "allowedValues": [
         "p",
         "d",
         "s"
       ]
     },
-    "recurrenceFrequency": {
-      "type": "string",
-      "defaultValue": "Day",
-      "allowedValues": [
-        "Month",
-        "Week",
-        "Day",
-        "Hour",
-        "Minute",
-        "Second"
-      ]
-    },
-    "recurrenceInterval": {
-      "type": "int",
-      "defaultValue": 1
-    },
-    "emailContact": {
-      "type": "string",
-      "defaultValue": "micdz@microsoft.com"
-    },
-    "container": {
-      "type": "string",
-      "defaultValue": "container"
-    },
-    "hostPoolName": {
-      "type": "string",
-      "defaultValue": "ProdMirror"
-    },
-    "triggerFrequency": {
-      "type": "string",
-      "defaultValue": "Day",
-      "allowedValues": [
-        "Month",
-        "Week",
-        "Day",
-        "Hour",
-        "Minute",
-        "Second"
-      ]
-    },
-    "triggerInterval": {
-      "type": "int",
-      "defaultValue": 1
-    },
-    "hostPoolResourceGroupName": {
-      "type": "string",
-      "defaultValue": "rg-sharedservices-til-001"
-    },
-    "sessionHostResourceGroupName": {
-      "type": "string",
-      "defaultValue": "rg-sharedservices-til-001"
-    },
-    "deploymentNameSuffix": {
-      "type": "string",
-      "defaultValue": "[utcNow()]"
-    },
-    "dayOfWeek": {
-      "type": "string",
-      "defaultValue": "Saturday",
-      "allowedValues": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday"
-      ]
-    },
-    "dayOfWeekOccurrence": {
-      "type": "string",
-      "defaultValue": "Second",
-      "allowedValues": [
-        "First",
-        "Second",
-        "Third",
-        "Fourth",
-        "LastDay"
-      ]
-    },
-    "startTime": {
-      "type": "string",
-      "defaultValue": "23:00"
-    },
     "exisitingAutomationAccount": {
       "type": "string",
-      "defaultValue": ""
+      "defaultValue": "",
+      "metadata": {
+        "description": "Set the following values if there are exisiting resource groups, automation accounts, or storage account that should be targeted. If values are not set a default naming convention will be used by resources created."
+      }
     },
     "existingAutomationAccountRg": {
       "type": "string",
@@ -130,9 +58,128 @@
       "type": "string",
       "defaultValue": ""
     },
+    "hostPoolName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Host pool name to target."
+      }
+    },
+    "hostPoolResourceGroupName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Host pool resource group name to target."
+      }
+    },
+    "sessionHostResourceGroupName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Session host resource group name to target."
+      }
+    },
+    "deploymentNameSuffix": {
+      "type": "string",
+      "defaultValue": "[utcNow()]",
+      "metadata": {
+        "description": "deployment name suffix."
+      }
+    },
+    "recurrenceFrequency": {
+      "type": "string",
+      "defaultValue": "Day",
+      "metadata": {
+        "description": "Frequency of logic app trigger for Image Check Logic App."
+      },
+      "allowedValues": [
+        "Month",
+        "Week",
+        "Day",
+        "Hour",
+        "Minute",
+        "Second"
+      ]
+    },
+    "recurrenceInterval": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Interval of logic app trigger for Image Check Logic App."
+      }
+    },
+    "emailContact": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "E-mail contact or group used by logic app approval workflow."
+      }
+    },
+    "triggerFrequency": {
+      "type": "string",
+      "defaultValue": "Day",
+      "metadata": {
+        "description": "Frequency of logic app trigger for Blob Check Logic App."
+      },
+      "allowedValues": [
+        "Month",
+        "Week",
+        "Day",
+        "Hour",
+        "Minute",
+        "Second"
+      ]
+    },
+    "triggerInterval": {
+      "type": "int",
+      "defaultValue": 1,
+      "metadata": {
+        "description": "Interval of logic app trigger for Blob Check Logic App."
+      }
+    },
+    "dayOfWeek": {
+      "type": "string",
+      "defaultValue": "Saturday",
+      "metadata": {
+        "description": "The target maintenance window day for AVD"
+      },
+      "allowedValues": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ]
+    },
+    "dayOfWeekOccurrence": {
+      "type": "string",
+      "defaultValue": "First",
+      "metadata": {
+        "description": "The target maintenance window week occurrence for AVD"
+      },
+      "allowedValues": [
+        "First",
+        "Second",
+        "Third",
+        "Fourth",
+        "LastDay"
+      ]
+    },
+    "startTime": {
+      "type": "string",
+      "defaultValue": "23:00",
+      "metadata": {
+        "description": "The target maintenance window start time for AVD"
+      }
+    },
     "storageAccountType": {
       "type": "string",
       "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "The storage SKU for the application blob storage."
+      },
       "allowedValues": [
         "Premium_LRS",
         "Premium_ZRS",
@@ -143,9 +190,23 @@
         "Standard_RAGZRS",
         "Standard_ZRS"
       ]
+    },
+    "container": {
+      "type": "string",
+      "defaultValue": ""
+    },
+    "keyVaultName": {
+      "type": "string",
+      "defaultValue": "kv-fs-contoso-va-d-01",
+      "metadata": {
+        "description": "The name of the key vault where secrets will be stored and consumed by runbooks. If deploying a new key vault, this value must be globally unique."
+      }
     }
   },
   "variables": {
+    "cloud": "[environment().name]",
+    "tenantId": "[tenant().tenantId]",
+    "subscriptionId": "[subscription().subscriptionId]",
     "workflows_GetImageVersion_name": "[format('la-{0}-avd-imageVersion', parameters('hostPoolName'))]",
     "workflows_GetBlobUpdate_name": "[format('la-{0}-avd-blobUpdate', parameters('hostPoolName'))]",
     "recurrenceType": "Recurrence",
@@ -252,10 +313,7 @@
     "rgVals": "[array(concat(variables('automationAccountRgVar'), variables('logicAppRgVar'), variables('storageAccountRgVar')))]",
     "ResourceGroups": "[union(variables('rg'), variables('rgVals'))]",
     "storageAccountNameValue": "[first(variables('storageAccountNameVar'))]",
-    "automationAccountNameValue": "[first(variables('automationAccountNameVar'))]",
-    "cloud": "[environment().name]",
-    "tenantId": "[tenant().tenantId]",
-    "subscriptionId": "[subscription().subscriptionId]"
+    "automationAccountNameValue": "[first(variables('automationAccountNameVar'))]"
   },
   "resources": [
     {
@@ -724,6 +782,9 @@
           },
           "roleId": {
             "value": "[variables('roleId')]"
+          },
+          "scope": {
+            "value": "resourceGroup().id"
           }
         },
         "template": {
@@ -733,7 +794,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "12395142138509701896"
+              "templateHash": "414560045777364444"
             }
           },
           "parameters": {
@@ -750,13 +811,17 @@
             },
             "roleId": {
               "type": "string"
+            },
+            "scope": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().id]"
             }
           },
           "resources": [
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
+              "name": "[guid(parameters('scope'), parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -768,7 +833,7 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(parameters('scope'), parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
@@ -809,7 +874,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "12395142138509701896"
+              "templateHash": "414560045777364444"
             }
           },
           "parameters": {
@@ -826,13 +891,17 @@
             },
             "roleId": {
               "type": "string"
+            },
+            "scope": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().id]"
             }
           },
           "resources": [
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
+              "name": "[guid(parameters('scope'), parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -844,7 +913,7 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(parameters('scope'), parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
@@ -885,7 +954,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "12395142138509701896"
+              "templateHash": "414560045777364444"
             }
           },
           "parameters": {
@@ -902,13 +971,17 @@
             },
             "roleId": {
               "type": "string"
+            },
+            "scope": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().id]"
             }
           },
           "resources": [
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
+              "name": "[guid(parameters('scope'), parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -920,7 +993,7 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(parameters('scope'), parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
@@ -961,7 +1034,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "12395142138509701896"
+              "templateHash": "414560045777364444"
             }
           },
           "parameters": {
@@ -978,13 +1051,17 @@
             },
             "roleId": {
               "type": "string"
+            },
+            "scope": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().id]"
             }
           },
           "resources": [
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
+              "name": "[guid(parameters('scope'), parameters('principalId'), parameters('roleId'))]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
@@ -996,7 +1073,7 @@
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
+              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(parameters('scope'), parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
             }
           }
         }
@@ -1014,9 +1091,8 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[format('rbac-automationAccount-deployment-{0}', parameters('deploymentNameSuffix'))]",
-      "subscriptionId": "[variables('subscriptionId')]",
-      "resourceGroup": "[variables('rg')[0]]",
+      "name": "[format('rbac-automationAccountOwner-deployment-{0}', parameters('deploymentNameSuffix'))]",
+      "location": "[deployment().location]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -1026,18 +1102,18 @@
           "principalId": {
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.aaIdentityId.value]"
           },
-          "roleId": {
-            "value": "[variables('roleId')]"
+          "scope": {
+            "value": "[subscription().id]"
           }
         },
         "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
           "metadata": {
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "12395142138509701896"
+              "templateHash": "14206020095114362973"
             }
           },
           "parameters": {
@@ -1047,12 +1123,12 @@
             },
             "description": {
               "type": "string",
-              "defaultValue": "Contributor RBAC permission"
+              "defaultValue": "Owner RBAC permission"
             },
             "principalId": {
               "type": "string"
             },
-            "roleId": {
+            "scope": {
               "type": "string"
             }
           },
@@ -1060,19 +1136,20 @@
             {
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-04-01-preview",
-              "name": "[guid(resourceGroup().id, parameters('principalId'), parameters('roleId'))]",
+              "name": "[guid(parameters('scope'), parameters('principalId'), '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
               "properties": {
                 "canDelegate": "[parameters('canDelegate')]",
                 "description": "[parameters('description')]",
                 "principalId": "[parameters('principalId')]",
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', parameters('roleId'))]"
+                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
+                "principalType": "ServicePrincipal"
               }
             }
           ],
           "outputs": {
             "rbac": {
               "type": "string",
-              "value": "[reference(resourceId('Microsoft.Authorization/roleAssignments', guid(resourceGroup().id, parameters('principalId'), parameters('roleId')))).roleDefinitionId]"
+              "value": "[reference(subscriptionResourceId('Microsoft.Authorization/roleAssignments', guid(parameters('scope'), parameters('principalId'), '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'))).roleDefinitionId]"
             }
           }
         }
@@ -1176,6 +1253,9 @@
           },
           "identityType": {
             "value": "[variables('identityType')]"
+          },
+          "keyVaultName": {
+            "value": "[parameters('keyVaultName')]"
           }
         },
         "template": {
@@ -1185,7 +1265,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.7.4.23292",
-              "templateHash": "3684960229930165143"
+              "templateHash": "8562123880860742344"
             }
           },
           "parameters": {
@@ -1265,6 +1345,9 @@
               "type": "string"
             },
             "templateSpecId": {
+              "type": "string"
+            },
+            "keyVaultName": {
               "type": "string"
             }
           },
@@ -1357,7 +1440,8 @@
                                       "HostPoolName": "[parameters('hostPoolName')]",
                                       "TenantId": "[parameters('tenantId')]",
                                       "TemplateSpecId": "[parameters('templateSpecId')]",
-                                      "SubscriptionId": "[parameters('subscriptionId')]"
+                                      "SubscriptionId": "[parameters('subscriptionId')]",
+                                      "KeyVault": "[parameters('keyVaultName')]"
                                     }
                                   }
                                 },
@@ -1682,6 +1766,7 @@
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('blobConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('kv-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('o365Connection-deployment-{0}', parameters('deploymentNameSuffix')))]",
         "resourceGroups",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
@@ -2124,6 +2209,115 @@
         "resourceGroups",
         "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[2]), 'Microsoft.Resources/deployments', format('sa-deployment-{0}', parameters('deploymentNameSuffix')))]"
       ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "[format('kv-deployment-{0}', parameters('deploymentNameSuffix'))]",
+      "subscriptionId": "[variables('subscriptionId')]",
+      "resourceGroup": "[variables('rg')[1]]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "keyvaultName": {
+            "value": "[parameters('keyVaultName')]"
+          },
+          "aaIdentityId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.aaIdentityId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.7.4.23292",
+              "templateHash": "3824080888532788675"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "The Azure Region to deploy the resources into"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to the Key Vault Instance"
+              }
+            },
+            "keyvaultName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Key Vault"
+              }
+            },
+            "aaIdentityId": {
+              "type": "string",
+              "metadata": {
+                "description": "The id of the automation account"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults",
+              "apiVersion": "2021-10-01",
+              "name": "[parameters('keyvaultName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "createMode": "default",
+                "enabledForDeployment": true,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": true,
+                "enableRbacAuthorization": true,
+                "enablePurgeProtection": true,
+                "networkAcls": {
+                  "bypass": "AzureServices"
+                },
+                "sku": {
+                  "family": "A",
+                  "name": "standard"
+                },
+                "tenantId": "[subscription().tenantId]"
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2020-04-01-preview",
+              "name": "[guid(parameters('aaIdentityId'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6'), parameters('keyvaultName'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]",
+                "principalId": "[parameters('aaIdentityId')]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ],
+          "outputs": {
+            "keyVaultName": {
+              "type": "string",
+              "value": "[parameters('keyvaultName')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[0]), 'Microsoft.Resources/deployments', format('aa-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('automationAccountConnection-deployment-{0}', parameters('deploymentNameSuffix')))]",
+        "resourceGroups"
+      ]
     }
   ],
   "outputs": {
@@ -2138,6 +2332,10 @@
     "ResourceGroups": {
       "type": "array",
       "value": "[array(concat(variables('automationAccountRgVar'), variables('logicAppRgVar'), variables('storageAccountRgVar')))]"
+    },
+    "keyVaultName": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', variables('subscriptionId'), variables('rg')[1]), 'Microsoft.Resources/deployments', format('kv-deployment-{0}', parameters('deploymentNameSuffix')))).outputs.keyVaultName.value]"
     }
   }
 }

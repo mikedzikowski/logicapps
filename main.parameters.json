@@ -61,6 +61,9 @@
         },
         "existingStorageAccountRg": {
             "value": "rg-fs-peo-va-d-storage-01"
+        },
+        "keyVaultName": {
+            "value": "kv-fs-peo-va-d-01"
         }
     }
 }
