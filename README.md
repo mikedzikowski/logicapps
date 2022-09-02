@@ -53,7 +53,7 @@ The solution uses the [O365 connector](https://docs.microsoft.com/en-us/connecto
 
 After the solution is deployed the O365 connector must be authenticated.
 
-
+![o365auth](https://user-images.githubusercontent.com/34066455/188218548-c2ec79f7-43cb-40f7-9c2c-9009a820845d.gif)
 
 Refence Links for the O365 Connector:
 [Connect using other accounts](https://docs.microsoft.com/en-us/azure/connectors/connectors-create-api-office365-outlook#connect-using-other-accounts)
