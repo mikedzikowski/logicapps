@@ -16,7 +16,16 @@ Param (
     [string]$TemplateSpecId,
 
     [Parameter(Mandatory)]
-    [string]$TenantId
+    [string]$TenantId,
+    
+    [Parameter(mandatory = $true)]
+    [string]$AutomationAccountName,
+
+    [Parameter(mandatory = $true)]
+    [string]$AutomationAccountResourceGroupName,
+
+    [Parameter(mandatory = $true)]
+    [string]$ScheduleName
 )
 
 $ErrorActionPreference = 'Stop'
@@ -172,4 +181,8 @@ New-AzSubscriptionDeployment `
     -TemplateSpecId $TemplateSpecId `
     @params
 
-Update-AzTag -resourceId $SessionHostsRg.ResourceId -Tag $HostPoolTags -operation Replace
+# Replacing Tags 
+Update-AzTag -resourceId $SessionHostsRg.ResourceId -Tag $HostPoolTags -Operation Replace
+
+# Removing Azutomation Schedule
+Remove-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $ScheduleName -ResourceGroupName $AutomationAccountResourceGroupName

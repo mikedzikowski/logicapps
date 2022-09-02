@@ -33,13 +33,16 @@ New-AzAutomationSchedule -AutomationAccountName $AutomationAccountName -Name $Sc
 
 Start-Sleep 10
 
-$params = @{
+$Params = @{
 "Environment"    = $Environment;
 "HostPoolName"   = $HostPoolName;
 "TenantId"       = $TenantId;
 "SubscriptionId" = $SubscriptionId;
 "TemplateSpecId" = $TemplateSpecId;
-"KeyVault"       = $KeyVault
+"KeyVault"       = $KeyVault;
+"AutomationAccount" = $AutomationAccountName;
+"AutomationAccountResourceGroup" = $ResourceGroupName;
+"Schedule" = $ScheduleName
 }
 # Register Automation Schedule to Runbook
-Register-AzAutomationScheduledRunbook -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -RunbookName $RunbookName -ScheduleName $ScheduleName -Parameters $params
+Register-AzAutomationScheduledRunbook -ResourceGroupName $ResourceGroupName -AutomationAccountName $AutomationAccountName -RunbookName $RunbookName -ScheduleName $ScheduleName -Parameters $Params
