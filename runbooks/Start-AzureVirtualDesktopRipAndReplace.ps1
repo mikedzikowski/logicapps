@@ -17,7 +17,7 @@ Param (
 
     [Parameter(Mandatory)]
     [string]$TenantId,
-    
+  
     [Parameter(mandatory = $true)]
     [string]$AutomationAccountName,
 
@@ -114,7 +114,11 @@ foreach($SessionHost in $SessionHosts)
         -Name $SessionHost.Id.Split('/')[-1] `
         -AllowNewSession:$false `
         | Out-Null
-        $SessionHostsResourceGroup = ($SessionHost).id.split("/")[8]
+		Write-OutPut "beep"
+        $SessionHostsName = $SessionHost.Id.Split('/')[-1]
+		$vmName = $SessionHostsName.Split('.')[-4]
+		$SessionHostsResourceGroup = (Get-azVm -name $vmName).ResourceGroupName
+		$SessionHostsResourceGroupId = (Get-AzResourceGroup -name $SessionHostsResourceGroup).ResourceId
 }
 
 # Get all active sessions
@@ -140,7 +144,7 @@ foreach($Session in $Sessions)
 }
 
 # Wait 15 minutes for all users to sign out
-Start-Sleep -Seconds 900
+#Start-Sleep -Seconds 900
 
 # Force logout any leftover sessions
 foreach($Session in $Sessions)
@@ -154,10 +158,6 @@ foreach($Session in $Sessions)
         -SessionHostName $SessionHost `
         -Id $UserSessionId
     Write-Verbose "Logging out user id: $($UserSessionId)"
-    $SessionHostsName = $SessionHost.Id.Split('/')[-1]
-    $vmName = $SessionHostsName.Split('.')[-4]
-    $SessionHostsResourceGroup = (Get-AzVm -Name $vmName).ResourceGroupName
-    $SessionHostsResourceGroupId = (Get-AzResourceGroup -Name $SessionHostsResourceGroup).ResourceId
 }
 
 # Remove the session hosts from the Host Pool
