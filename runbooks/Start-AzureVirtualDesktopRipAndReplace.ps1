@@ -17,7 +17,7 @@ Param (
 
     [Parameter(Mandatory)]
     [string]$TenantId,
-  
+
     [Parameter(mandatory = $true)]
     [string]$AutomationAccountName,
 
@@ -59,10 +59,10 @@ $SessionHostsCount = $SessionHosts.count
 
 # Need to add keyvault to build and setting secrets to build
 $SasToken = (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "sas").SecretValue
-$DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "djuser" -AsPlainText)
+$DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "djUser" -AsPlainText)
 $DomainJoinPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "dj").SecretValue
-$vmUser =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmuser" -AsPlainText)
-$vmPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmpw").SecretValue
+$vmUser =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmUser" -AsPlainText)
+$vmPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmPassword").SecretValue
 
 # Get details for deployment params
 $Params = @{
@@ -116,7 +116,7 @@ foreach($SessionHost in $SessionHosts)
         | Out-Null
 		Write-OutPut "beep"
         $SessionHostsName = $SessionHost.Id.Split('/')[-1]
-		$vmName = $SessionHostsName.Split('.')[-4]
+		$vmName = $SessionHostsName.Split('.')[0]
 		$SessionHostsResourceGroup = (Get-azVm -name $vmName).ResourceGroupName
 		$SessionHostsResourceGroupId = (Get-AzResourceGroup -name $SessionHostsResourceGroup).ResourceId
 }

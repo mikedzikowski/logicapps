@@ -29,23 +29,23 @@ Repo for a logic app and set of automation scripts to rip and replace your AVD e
 4. Manual Steps
 
 
-## Key Vault Secrets 
+## Key Vault Secrets
 
 Create the following secrets in the keyvault deployed to support the following lines of code:
 
 ```PowerShell
 $SasToken = (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "sas").SecretValue
-$DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "djuser" -AsPlainText)
+$DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "djUser" -AsPlainText)
 $DomainJoinPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "dj").SecretValue
-$vmUser =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmuser" -AsPlainText)
-$vmPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmpw").SecretValue
+$vmUser =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmUser" -AsPlainText)
+$vmPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmPassword").SecretValue
 ```
 
 * "sas" - SAS Token for the container of the storage account
-* "djuser" - Domain join user for the Azure Active Directory environment
+* "djUser" - Domain join user for the Azure Active Directory environment
 * "dj" - Domain join password for the djuser
-* "vmuser" - The name of the vmuser for the virtual machine infastructure
-* "vmpassword' - The password for the virtual machine infrastructure
+* "vmUser" - The name of the vmuser for the virtual machine infastructure
+* "vmPassword' - The password for the virtual machine infrastructure
 
 ## Authenticate API connector for Office 365
 
