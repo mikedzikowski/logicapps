@@ -114,7 +114,6 @@ foreach($SessionHost in $SessionHosts)
         -Name $SessionHost.Id.Split('/')[-1] `
         -AllowNewSession:$false `
         | Out-Null
-		Write-OutPut "beep"
         $SessionHostsName = $SessionHost.Id.Split('/')[-1]
 		$vmName = $SessionHostsName.Split('.')[0]
 		$SessionHostsResourceGroup = (Get-azVm -name $vmName).ResourceGroupName
@@ -144,7 +143,7 @@ foreach($Session in $Sessions)
 }
 
 # Wait 15 minutes for all users to sign out
-#Start-Sleep -Seconds 900
+Start-Sleep -Seconds 900
 
 # Force logout any leftover sessions
 foreach($Session in $Sessions)
