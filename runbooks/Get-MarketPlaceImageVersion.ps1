@@ -37,6 +37,7 @@ foreach ($version in $versions) {
 
 $objOut = [PSCustomObject]@{
     NewImageFound = $newImageFound
+    ImageVersion = $versions
 }
 
 Write-Output ( $objOut | ConvertTo-Json)
