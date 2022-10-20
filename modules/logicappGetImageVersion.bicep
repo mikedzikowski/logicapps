@@ -170,12 +170,12 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                 inputs: {
                   body: {
                     Message: {
-                      Body: 'Hostpool: @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']}\n\n\nNew Image Status:  @{body(\'Parse_image_version\')?[\'NewImageFound\']}\n\n\nPlease approve schedule on the ${dayOfWeekOccurrence} ${dayOfWeek} of the Month @ ${startTime} for "rip and replace" of @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']} AVD enviroment. \n'
+                      Body: 'Hostpool: @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']}\n\n\nNew Image Version:  @{body(\'Parse_image_version\')?[\'ImageVersion\']}\n\n\nPlease approve schedule on the ${dayOfWeekOccurrence} ${dayOfWeek} of the Month @ ${startTime} for "rip and replace" of @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']} AVD enviroment. \n'
                       HideHTMLMessage: true
                       Importance: 'High'
                       Options: 'Approve, Reject'
                       ShowHTMLConfirmationDialog: false
-                      Subject: 'New Image Found for AVD Hostpool Environment - @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']}. Please Approve or Reject Creating Automated Schedule for Updating AVD Environment'
+                      Subject: 'New Image Version Found for AVD Hostpool Environment - @{body(\'Parse_Session_Host_VM_and_RG\')?[\'hostPool\']}. Please Approve or Reject Creating Automated Schedule for Updating AVD Environment'
                       To: emailContact
                     }
                     NotificationUrl: '@{listCallbackUrl()}'
@@ -399,6 +399,9 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
               properties: {
                 NewImageFound: {
                   type: 'boolean'
+                }
+                ImageVersion: {
+                  type: 'string'
                 }
               }
               type: 'object'
