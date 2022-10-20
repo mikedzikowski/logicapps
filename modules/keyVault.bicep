@@ -1,4 +1,4 @@
-// Creates a KeyVault 
+// Creates a KeyVault
 @description('The Azure Region to deploy the resources into')
 param location string = resourceGroup().location
 
@@ -10,6 +10,44 @@ param keyvaultName string
 
 @description('The id of the automation account')
 param aaIdentityId string
+
+@secure()
+param VmPassword string
+
+@secure()
+param DomainJoinPassword string
+
+@secure()
+param DomainJoinUserPrincipalName string
+
+@secure()
+param SasToken string
+
+@secure()
+param VmUsername string
+
+var Secrets = [
+  {
+    name: 'VmPassword'
+    value: VmPassword
+  }
+  {
+    name: 'VmUsername'
+    value: VmUsername
+  }
+  {
+    name: 'DomainJoinPassword'
+    value: DomainJoinPassword
+  }
+  {
+    name: 'DomainJoinUserPrincipalName'
+    value: DomainJoinUserPrincipalName
+  }
+  {
+    name: 'SasToken'
+    value: SasToken
+  }
+]
 
 @description('This is the built-in Key Vault Administrator role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#key-vault-administrator')
 resource keyVaultSecretRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
@@ -26,7 +64,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
     enabledForDiskEncryption: false
     enabledForTemplateDeployment: true
     enableRbacAuthorization: true
-    enablePurgeProtection: false
     networkAcls: {
       bypass: 'AzureServices'
     }
@@ -45,5 +82,13 @@ resource keyVaultAdminRoleAssignment 'Microsoft.Authorization/roleAssignments@20
     principalType: 'ServicePrincipal'
   }
 }
+
+resource secrets 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = [for Secret in Secrets: {
+  parent: keyVault
+  name: Secret.name
+  properties: {
+    value: Secret.value
+  }
+}]
 
 output keyVaultName string = keyVault.name

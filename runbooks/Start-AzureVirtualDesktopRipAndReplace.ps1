@@ -58,10 +58,10 @@ $SessionHosts = Get-AzWvdSessionHost `
 $SessionHostsCount = $SessionHosts.count
 
 # Need to add keyvault to build and setting secrets to build
-$SasToken = (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "sas").SecretValue
-$DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "djUser" -AsPlainText)
-$DomainJoinPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "dj").SecretValue
-$vmUser =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmUser" -AsPlainText)
+$SasToken = (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "SasToken").SecretValue
+$DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "DomainJoinUserPrincipalName" -AsPlainText)
+$DomainJoinPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "DomainJoinPassword").SecretValue
+$vmUser =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "VmUsername" -AsPlainText)
 $vmPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmPassword").SecretValue
 
 # Get details for deployment params
