@@ -62,7 +62,7 @@ $SasToken = (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "SasToken").SecretV
 $DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "DomainJoinUserPrincipalName" -AsPlainText)
 $DomainJoinPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "DomainJoinPassword").SecretValue
 $vmUser =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "VmUsername" -AsPlainText)
-$vmPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "vmPassword").SecretValue
+$vmPassword =  (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "VmPassword").SecretValue
 
 # Get details for deployment params
 $Params = @{
