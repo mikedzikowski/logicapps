@@ -6,7 +6,7 @@
             "value": "usgovvirginia"
         },
         "templateSpecId": {
-            "value": "/subscriptions/f4972a61-1083-4904-a4e2-a790107320bf/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/avd/versions/1.1"
+            "value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/testrg/providers/Microsoft.Resources/templateSpecs/avd/versions/1.1"
         },
         "Environment": {
             "value": "s"
@@ -18,13 +18,13 @@
             "value": 1
         },
         "emailContact": {
-            "value": "micdz@microsoft.com"
+            "value": "micdz@contoso.com"
         },
         "container": {
-            "value": "fsavd"
+            "value": "envavd"
         },
         "hostPoolName": {
-            "value": "hp-fs-peo-va-d-01"
+            "value": "hp-env-xxx-va-d-01"
         },
         "triggerFrequency": {
             "value": "Day"
@@ -33,10 +33,10 @@
             "value": 1
         },
         "hostPoolResourceGroupName": {
-            "value": "rg-fs-peo-va-d-management-01"
+            "value": "rg-env-xxx-va-d-management-01"
         },
         "sessionHostResourceGroupName": {
-            "value": "rg-fs-peo-va-d-hosts-01"
+            "value": "rg-env-xxx-va-d-hosts-01"
         },
         "dayOfWeek": {
             "value": "Saturday"
@@ -48,22 +48,22 @@
             "value": "23:00"
         },
         "exisitingAutomationAccount": {
-            "value": "aa-fs-peo-va-d-00-rar"
+            "value": "aa-env-xxx-va-d-00-rar"
         },
         "existingAutomationAccountRg": {
-            "value": "rg-fs-peo-va-d-management-01"
+            "value": "rg-env-xxx-va-d-management-01"
         },
         "existingLogicAppRg": {
-            "value": "rg-fs-peo-va-d-management-01"
+            "value": "rg-env-xxx-va-d-management-01"
         },
         "exisitingStorageAccount": {
-            "value": "stfspeovad0111"
+            "value": "stenvxxxvad0111"
         },
         "existingStorageAccountRg": {
-            "value": "rg-fs-peo-va-d-storage-01"
+            "value": "rg-env-xxx-va-d-storage-01"
         },
         "keyVaultName": {
-            "value": "kv-fs-peo-va-d-01"
+            "value": "kv-env-xxx-va-d-01"
         }
     }
 }
