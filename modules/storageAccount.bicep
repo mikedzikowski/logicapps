@@ -8,19 +8,12 @@
   'Standard_RAGZRS'
   'Standard_ZRS'
 ])
-param storageAccountType string
-param location string = resourceGroup().location
+
 param storageAccountName string
 param containerName string
 
-resource sa 'Microsoft.Storage/storageAccounts@2021-04-01' = {
+resource sa 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
   name: uniqueString(storageAccountName, resourceGroup().id)
-  location: location
-  sku: {
-    name: storageAccountType
-  }
-  kind: 'StorageV2'
-  properties: {}
 }
 
 resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2021-06-01' = {
