@@ -1,6 +1,5 @@
 targetScope = 'subscription'
 
-@secure()
 @description('The UPN of the privileged account to domain join the AVD session hosts to your domain. This should be an account the resides within the domain you are joining.')
 param DomainJoinUserPrincipalName string
 
@@ -8,7 +7,6 @@ param DomainJoinUserPrincipalName string
 @description('The password of the privileged account to domain join the AVD session hosts to your domain')
 param DomainJoinPassword string
 
-@secure()
 @description('The Local Administrator Username for the Session Hosts')
 param VmUsername string
 
@@ -111,18 +109,18 @@ param dayOfWeekOccurrence string = 'First'
 @description('The target maintenance window start time for AVD')
 param startTime string = '23:00'
 
-@allowed([
-  'Premium_LRS'
-  'Premium_ZRS'
-  'Standard_GRS'
-  'Standard_GZRS'
-  'Standard_LRS'
-  'Standard_RAGRS'
-  'Standard_RAGZRS'
-  'Standard_ZRS'
-])
-@description('The storage SKU for the application blob storage.')
-param storageAccountType string = 'Standard_LRS'
+// @allowed([
+//   'Premium_LRS'
+//   'Premium_ZRS'
+//   'Standard_GRS'
+//   'Standard_GZRS'
+//   'Standard_LRS'
+//   'Standard_RAGRS'
+//   'Standard_RAGZRS'
+//   'Standard_ZRS'
+// ])
+// @description('The storage SKU for the application blob storage.')
+// param storageAccountType string = 'Standard_LRS'
 
 // Get BlobUpdate Logic App Parameters
 param container string = ''
@@ -131,6 +129,7 @@ param container string = ''
 param keyVaultName string = 'kv-fs-contoso-va-d-01'
 
 // Variables
+var prodHostPoolName = replace(hostPoolName, 'd', 'p')
 var cloud = environment().name
 var tenantId = tenant().tenantId
 var subscriptionId = subscription().subscriptionId
@@ -231,7 +230,7 @@ var LocationShortNames = {
 }
 var LocationShortName = LocationShortNames[location]
 var NamingStandard = '${Environment}-${LocationShortName}'
-var storageAccountName = replace('sa${NamingStandard}', '-', '')
+// var storageAccountName = replace('sa${NamingStandard}', '-', '')
 
 var automationAccountRgVar = ((!empty(existingAutomationAccountRg )) ? [
   existingAutomationAccountRg
@@ -251,12 +250,6 @@ var storageAccountRgVar = ((!empty(existingStorageAccountRg)) ? [
   'rg-${NamingStandard}-stg'
 ])
 
-var storageAccountNameVar = ((!empty(exisitingStorageAccount)) ? [
-  exisitingStorageAccount
-]: [
-  replace(storageAccountName, 'sa', uniqueString(NamingStandard))
-])
-
 var automationAccountNameVar = ((!empty(exisitingAutomationAccount)) ? [
   exisitingAutomationAccount
 ]: [
@@ -266,7 +259,6 @@ var automationAccountNameVar = ((!empty(exisitingAutomationAccount)) ? [
 var rg = (array(concat(automationAccountRgVar,logicAppRgVar,storageAccountRgVar)))
 var rgVals = (array(concat(automationAccountRgVar,logicAppRgVar,storageAccountRgVar)))
 var ResourceGroups = union(rg, rgVals)
-var storageAccountNameValue = first(storageAccountNameVar)
 var automationAccountNameValue = first(automationAccountNameVar)
 
 // Resource Groups needed for the solution
@@ -279,9 +271,7 @@ module storageAccount 'modules/storageAccount.bicep' = {
   name: 'sa-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, rg[2])
   params: {
-    storageAccountName: storageAccountNameValue
-    location: location
-    storageAccountType: storageAccountType
+    storageAccountName: exisitingStorageAccount
     containerName: container
   }
   dependsOn: [
@@ -431,6 +421,7 @@ module rbacPermissionAzureAutomationAccountRg 'modules/rbacPermissionsSubscripti
   params: {
     principalId: automationAccount.outputs.aaIdentityId
     scope: subscription().id
+    roleId: roleId
   }
   dependsOn: [
     automationAccount
@@ -443,7 +434,7 @@ module rbacPermissionAzureAutomationAccountRg 'modules/rbacPermissionsSubscripti
   ]
 }
 
-module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
+module getImageVersionlogicApp 'modules/test.bicep' = {
   name: 'getImageVersionlogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, rg[1])
   params: {
@@ -474,6 +465,7 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     hostPoolName: hostPoolName
     identityType: identityType
     keyVaultName: keyVaultName
+    prodHostPoolName: prodHostPoolName
   }
   dependsOn: [
     automationAccount

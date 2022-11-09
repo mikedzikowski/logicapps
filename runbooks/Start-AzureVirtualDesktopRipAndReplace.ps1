@@ -57,6 +57,14 @@ $SessionHosts = Get-AzWvdSessionHost `
 
 $SessionHostsCount = $SessionHosts.count
 
+# Get Virtal Network and Subnet
+$sessionHostName = $SessionHosts[0].Name.split('/')[-1]
+$vmName = $sessionHostName.split('.')[0]
+$vM = Get-AzVm -Name $vmName
+$nic = $vM.NetworkProfile.NetworkInterfaces
+$networkInterface = ($nic.id -split '/')[-1]
+$nicDetails = Get-AzNetworkInterface -Name $networkInterface
+
 # Need to add keyvault to build and setting secrets to build
 $SasToken = (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "SasToken").SecretValue
 $DomainJoinUser= (Get-AzKeyVaultSecret -VaultName $KeyVault -Name "DomainJoinUserPrincipalName" -AsPlainText)
@@ -91,11 +99,9 @@ $Params = @{
     TenantShortName = $HostPoolName.Split('-')[1]
     VmSize = $Configuration.VmSize
     SessionHostCount = $SessionHostsCount
-    VirtualNetwork = 'vnet-shd-net-d-va' # need to dynamically retrieve this value
-    VirtualNetwork2 = 'vnet-shd-net-d-va-01' # need to dynamically retrieve this value if more than one vNet is present in environment
-    VirtualNetwork3 = 'vnet-shd-net-d-va-02' # need to dynamically retrieve this value if more than one vNet is present in environment
-    VirtualNetworkResourceGroup = 'rg-shd-net-d-va' # need to dynamically retrieve this value (?)
-    Subnet = 'Clients' # need to dynamically retrieve this value
+    VirtualNetwork = ($nicdetails.IpConfigurations.subnet.Id -split '/')[-3]
+    VirtualNetworkResourceGroup = ($nicdetails.IpConfigurations.subnet.Id -split '/')[-7]
+    Subnet = ($nicdetails.IpConfigurations.subnet.Id -split '/')[-1]
     Timestamp = $TimeStamp
     ValidationEnvironment = $true
     ScriptContainerSasToken = $SasToken
