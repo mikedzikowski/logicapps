@@ -303,7 +303,6 @@ module automationAccountConnection 'modules/automationAccountConnection.bicep' =
   }
   dependsOn: [
     automationAccount
-    storageAccount
     resourceGroups
   ]
 }
@@ -321,8 +320,6 @@ module blobConnection 'modules/blobConnection.bicep' = {
   dependsOn: [
     automationAccount
     automationAccountConnection
-    storageAccount
-    resourceGroups
   ]
 }
 
@@ -338,8 +335,6 @@ module o365Connection 'modules/officeConnection.bicep' = {
   dependsOn: [
     automationAccount
     automationAccountConnection
-    storageAccount
-    resourceGroups
   ]
 }
 
@@ -355,10 +350,6 @@ module rbacPermissionAzureAutomationConnector 'modules/rbacPermissions.bicep' = 
     automationAccount
     automationAccountConnection
     blobConnection
-    getBlobUpdateLogicApp
-    getImageVersionlogicApp
-    storageAccount
-    resourceGroups
   ]
 }
 
@@ -373,10 +364,6 @@ module rbacBlobPermissionConnector 'modules/rbacPermissions.bicep' = {
     automationAccount
     automationAccountConnection
     blobConnection
-    getBlobUpdateLogicApp
-    getImageVersionlogicApp
-    storageAccount
-    resourceGroups
   ]
 }
 
@@ -390,11 +377,6 @@ module rbacHostPoolPermissionAzureAutomationAccount 'modules/rbacPermissions.bic
   dependsOn: [
     automationAccount
     automationAccountConnection
-    blobConnection
-    getBlobUpdateLogicApp
-    getImageVersionlogicApp
-    storageAccount
-    resourceGroups
   ]
 }
 
@@ -408,11 +390,6 @@ module rbacSessionHostPermissionAzureAutomationAccount 'modules/rbacPermissions.
   dependsOn: [
     automationAccount
     automationAccountConnection
-    blobConnection
-    getBlobUpdateLogicApp
-    getImageVersionlogicApp
-    storageAccount
-    resourceGroups
   ]
 }
 
@@ -421,20 +398,14 @@ module rbacPermissionAzureAutomationAccountRg 'modules/rbacPermissionsSubscripti
   params: {
     principalId: automationAccount.outputs.aaIdentityId
     scope: subscription().id
-    roleId: roleId
   }
   dependsOn: [
     automationAccount
     automationAccountConnection
-    blobConnection
-    getBlobUpdateLogicApp
-    getImageVersionlogicApp
-    storageAccount
-    resourceGroups
   ]
 }
 
-module getImageVersionlogicApp 'modules/test.bicep' = {
+module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
   name: 'getImageVersionlogicApp-deployment-${deploymentNameSuffix}'
   scope: resourceGroup(subscriptionId, rg[1])
   params: {
@@ -468,12 +439,8 @@ module getImageVersionlogicApp 'modules/test.bicep' = {
     prodHostPoolName: prodHostPoolName
   }
   dependsOn: [
-    automationAccount
-    automationAccountConnection
     blobConnection
     o365Connection
-    storageAccount
-    resourceGroups
     keyVault
   ]
 }
@@ -506,11 +473,7 @@ module getBlobUpdateLogicApp 'modules/logicAppGetBlobUpdate.bicep' = {
     runbookNewHostPoolRipAndReplace: runbookNewHostPoolRipAndReplace
   }
   dependsOn: [
-    automationAccount
-    automationAccountConnection
     blobConnection
-    storageAccount
-    resourceGroups
   ]
 }
 
@@ -528,8 +491,6 @@ module keyVault 'modules/keyVault.bicep' = {
     aaIdentityId: automationAccount.outputs.aaIdentityId
   }
   dependsOn: [
-    automationAccount
-    automationAccountConnection
     resourceGroups
   ]
 }
