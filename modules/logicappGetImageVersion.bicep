@@ -422,7 +422,7 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
               }
             }
             method: 'get'
-            path: concat('/subscriptions/@{encodeURIComponent(\'${subscriptionId}\')}/resourceGroups/@{encodeURIComponent(\'${automationAccountResourceGroup}\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'${automationAccountName}\')}/jobs/@{encodeURIComponent(body(\'Get_Session_Host_Information_Resource_Group_and_Virtual_Machine_Name\')?[\'properties\']?[\'jobId\'])}/output')
+            path: concat('/subscriptions/@{encodeURIComponent(\'${subscriptionId}\')}/resourceGroups/@{encodeURIComponent(\'${automationAccountResourceGroup}\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'${automationAccountName}\')}/jobs/@{encodeURIComponent(body(\'Check_for_Exisiting_Runbook_Schedule_for_Hostpool_Validation_Environment\')?[\'properties\']?[\'jobId\'])}/output')
             queries: {
               'x-ms-api-version': '2015-10-31'
             }
