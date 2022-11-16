@@ -32,13 +32,13 @@ param exisitingStorageAccount string = ''
 param existingStorageAccountRg string = ''
 
 @description('Host pool name to target.')
-param hostPoolName string = ''
+param hostPoolName string
 
 @description('Host pool resource group name to target.')
-param hostPoolResourceGroupName string = ''
+param hostPoolResourceGroupName string
 
 @description('Session host resource group name to target.')
-param sessionHostResourceGroupName string = ''
+param sessionHostResourceGroupName string
 
 @description('deployment name suffix.')
 param deploymentNameSuffix string = utcNow()
@@ -58,7 +58,7 @@ param recurrenceFrequency string = 'Day'
 param recurrenceInterval int = 1
 
 @description('E-mail contact or group used by logic app approval workflow.')
-param emailContact string = ''
+param emailContact string
 
 @allowed([
   'Month'
@@ -101,10 +101,10 @@ param dayOfWeekOccurrence string = 'First'
 param startTime string = '23:00'
 
 // Get BlobUpdate Logic App Parameters
-param container string = ''
+param container string
 
 @description('The name of the key vault where secrets will be stored and consumed by runbooks. If deploying a new key vault, this value must be globally unique.')
-param keyVaultName string = 'kv-fs-contoso-va-d-01'
+param keyVaultName string
 
 // Variables
 var cloud = environment().name
