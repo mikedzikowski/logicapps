@@ -24,15 +24,6 @@ param location string = deployment().location
 @description('The Template Spec version ID that will be used to by the rip and replace AVD solution.')
 param templateSpecId string = ''
 
-// Environment
-@allowed([
-  'p' // Production
-  'd' // Development
-  's' // Staging
-])
-@description('The target environment for the solution. This value will be used by naming convention if exisiting resources are not targeted.')
-param Environment string = 'd'
-
 @description('Set the following values if there are exisiting resource groups, automation accounts, or storage account that should be targeted. If values are not set a default naming convention will be used by resources created.')
 param exisitingAutomationAccount string = ''
 param existingAutomationAccountRg string = ''
@@ -109,19 +100,6 @@ param dayOfWeekOccurrence string = 'First'
 @description('The target maintenance window start time for AVD')
 param startTime string = '23:00'
 
-// @allowed([
-//   'Premium_LRS'
-//   'Premium_ZRS'
-//   'Standard_GRS'
-//   'Standard_GZRS'
-//   'Standard_LRS'
-//   'Standard_RAGRS'
-//   'Standard_RAGZRS'
-//   'Standard_ZRS'
-// ])
-// @description('The storage SKU for the application blob storage.')
-// param storageAccountType string = 'Standard_LRS'
-
 // Get BlobUpdate Logic App Parameters
 param container string = ''
 
@@ -129,7 +107,6 @@ param container string = ''
 param keyVaultName string = 'kv-fs-contoso-va-d-01'
 
 // Variables
-var prodHostPoolName = replace(hostPoolName, 'd', 'p')
 var cloud = environment().name
 var tenantId = tenant().tenantId
 var subscriptionId = subscription().subscriptionId
@@ -229,8 +206,7 @@ var LocationShortNames = {
   westus3: 'wu3'
 }
 var LocationShortName = LocationShortNames[location]
-var NamingStandard = '${Environment}-${LocationShortName}'
-// var storageAccountName = replace('sa${NamingStandard}', '-', '')
+var NamingStandard = '${LocationShortName}'
 
 var automationAccountRgVar = ((!empty(existingAutomationAccountRg )) ? [
   existingAutomationAccountRg
@@ -436,7 +412,6 @@ module getImageVersionlogicApp 'modules/logicappGetImageVersion.bicep' = {
     hostPoolName: hostPoolName
     identityType: identityType
     keyVaultName: keyVaultName
-    prodHostPoolName: prodHostPoolName
   }
   dependsOn: [
     blobConnection

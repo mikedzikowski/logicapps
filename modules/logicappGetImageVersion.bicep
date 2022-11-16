@@ -25,7 +25,6 @@ param subscriptionId string
 param hostPoolName string
 param templateSpecId string
 param keyVaultName string
-param prodHostPoolName string
 
 resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017-07-01' = {
   name: workflows_GetImageVersion_name
@@ -96,76 +95,6 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
           actions: {
             Condition_Check_for_Approval_Selection_in_Email: {
               actions: {
-                Condition: {
-                  actions: {
-                    Create_job: {
-                      runAfter: {
-                      }
-                      type: 'ApiConnection'
-                      inputs: {
-                        body: {
-                          properties: {
-                            parameters: {
-                              AutomationAccountName: automationAccountName
-                              ResourceGroupName: automationAccountResourceGroup
-                              ScheduleName: '${prodHostPoolName}-ScheduleForRipAndReplace'
-                              StartTime: startTime
-                              DayOfWeek: dayOfWeek
-                              DayOfWeekOccurrence: dayOfWeekOccurrence
-                              environment: cloud
-                              runbookName: runbookNewHostPoolRipAndReplace
-                              HostPoolName: prodHostPoolName
-                              TenantId: tenantId
-                              TemplateSpecId: templateSpecId
-                              SubscriptionId: subscriptionId
-                              KeyVault: keyVaultName
-                            }
-                          }
-                        }
-                        host: {
-                          connection: {
-                            name: '@parameters(\'$connections\')[\'azureautomation\'][\'connectionId\']'
-                          }
-                        }
-                        method: 'put'
-                        path: '/subscriptions/@{encodeURIComponent(\'f4972a61-1083-4904-a4e2-a790107320bf\')}/resourceGroups/@{encodeURIComponent(\'rg-fs-peo-va-d-management-01\')}/providers/Microsoft.Automation/automationAccounts/@{encodeURIComponent(\'aa-fs-peo-va-d-00-rar\')}/jobs'
-                        queries: {
-                          runbookName: 'New-AutomationSchedule'
-                          wait: true
-                          'x-ms-api-version': '2015-10-31'
-                        }
-                      }
-                    }
-                  }
-                  runAfter: {
-                    Send_Approval_Email_for_Rip_and_Replace_in_Production_AVD_environment: [
-                      'Succeeded'
-                    ]
-                  }
-                  else: {
-                    actions: {
-                      Terminate_3: {
-                        runAfter: {
-                        }
-                        type: 'Terminate'
-                        inputs: {
-                          runStatus: 'Failed'
-                        }
-                      }
-                    }
-                  }
-                  expression: {
-                    and: [
-                      {
-                        equals: [
-                          '@body(\'Send_Approval_Email_for_Rip_and_Replace_in_Production_AVD_environment\')?[\'SelectedOption\']'
-                          'Approve'
-                        ]
-                      }
-                    ]
-                  }
-                  type: 'If'
-                }
                 Create_Schedule_for_Hostpool_Rip_and_Replace_on_Validation_Environment: {
                   runAfter: {
                   }
@@ -201,48 +130,6 @@ resource workflows_GetImageVersion_name_resource 'Microsoft.Logic/workflows@2017
                       runbookName: 'New-AutomationSchedule'
                       wait: true
                       'x-ms-api-version': '2015-10-31'
-                    }
-                  }
-                }
-                Send_Approval_Email_for_Rip_and_Replace_in_Production_AVD_environment: {
-                  runAfter: {
-                    Wait_2_Hours_for_Validation_Environment_Verification: [
-                      'Succeeded'
-                    ]
-                  }
-                  type: 'ApiConnectionWebhook'
-                  inputs: {
-                    body: {
-                      Message: {
-                        HideHTMLMessage: true
-                        Importance: 'High'
-                        Options: 'Approve, Reject'
-                        SelectionText: 'Approval Requested -Deployment for Rip and Replace in Production AVD environment'
-                        ShowHTMLConfirmationDialog: false
-                        Subject: 'Approval Requested -Deployment for Rip and Replace in Production AVD environment.'
-                        To: emailContact
-                      }
-                      NotificationUrl: '@{listCallbackUrl()}'
-                    }
-                    host: {
-                      connection: {
-                        name: '@parameters(\'$connections\')[\'office365\'][\'connectionId\']'
-                      }
-                    }
-                    path: '/approvalmail/$subscriptions'
-                  }
-                }
-                Wait_2_Hours_for_Validation_Environment_Verification: {
-                  runAfter: {
-                    Create_Schedule_for_Hostpool_Rip_and_Replace_on_Validation_Environment: [
-                      'Succeeded'
-                    ]
-                  }
-                  type: 'Wait'
-                  inputs: {
-                    interval: {
-                      count: 2
-                      unit: 'Hour'
                     }
                   }
                 }
