@@ -54,6 +54,7 @@ resource keyVaultSecretRoleDefinition 'Microsoft.Authorization/roleDefinitions@2
   scope:  subscription()
   name: '4633458b-17de-408a-b874-0445c86b69e6'
 }
+
 resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
   name: keyvaultName
   location: location
@@ -74,6 +75,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-10-01' = {
     tenantId: subscription().tenantId
   }
 }
+
 resource keyVaultAdminRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(aaIdentityId, keyVaultSecretRoleDefinition.id, keyvaultName)
   properties: {
